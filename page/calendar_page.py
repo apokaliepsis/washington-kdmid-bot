@@ -1,11 +1,8 @@
 import random
-import string
 
-from cffi.backend_ctypes import xrange
-
-from control import Control
-from google_doc import Google_Doc
-from manager_app import ManagerApp
+from manager.control import Control
+from network_file.google_doc import Google_Doc
+from manager.manager_app import ManagerApp
 from datetime import datetime, timedelta
 import time
 from time import sleep
@@ -97,6 +94,8 @@ class Calendar_Page:
                 try:
                     driver.find_element_by_xpath("//*[@title='Перейти к следующему месяцу']").click()
                 except:
+                    ManagerApp().get_logger().warn("Calendar is not available")
+                    ManagerApp().get_driver().quit()
                     Control().get_client_order(client_data)
 
             else:
@@ -153,8 +152,7 @@ class Calendar_Page:
                 if len(driver.find_elements_by_xpath("//*[contains(text(), ' Почему так случилось?')]")) > 0:
                     print("Найдена страница блокировки!")
                     # driver.delete_all_cookies()
-                    driver.quit()
-                    ManagerApp().set_None_Driver()
+                    ManagerApp().quit_driver()
                     Control().get_client_order(client_data)
         elif is_multidates == True:
             if len(driver.find_elements_by_xpath(self.table_xpath)) > 0:
@@ -172,11 +170,11 @@ class Calendar_Page:
         driver = ManagerApp().get_driver()
         driver.find_element_by_name("ctl00$MainContent$Button1").click()
 
-    def get_doc_order(self):
-        screen = "succes_order/" + "".join([random.choice(string.ascii_letters) for i in xrange(10)]) + str(".png")
+    def click_by_print(self):
+
         ManagerApp().get_logger().info("Save order document as screenshot:")
         driver = ManagerApp().get_driver()
+
         driver.find_element_by_xpath("//*[@name='ctl00$MainContent$Button1' and @value='Печать']").click()
 
-        driver.save_screenshot(screen)
-        return screen
+

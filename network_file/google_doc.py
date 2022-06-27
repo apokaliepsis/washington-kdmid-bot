@@ -1,4 +1,8 @@
 import pygsheets
+
+from manager.manager_app import ManagerApp
+
+
 class Google_Doc:
     name = "Имя"
     surname = "Фамилия"
@@ -17,18 +21,23 @@ class Google_Doc:
             print(i)
         return client_data
 
-    def delete_row_from_doc(self, value):
-        wk1 = self.get_sheet()
-        client_data = wk1.get_all_records()
-        count = 2
-        for i in client_data:
-            row = i.values()
-            if str(value) in str(row):
-                print(wk1.get_row(count))
-                wk1.delete_rows(count)
-            count += 1
+    @staticmethod
+    def delete_row_from_doc(value):
+        try:
+            wk1 = Google_Doc.get_sheet()
+            client_data = wk1.get_all_records()
+            count = 2
+            for i in client_data:
+                row = i.values()
+                if str(value) in str(row):
+                    print(wk1.get_row(count))
+                    wk1.delete_rows(count)
+                count += 1
+        except Exception as e:
+            ManagerApp.get_logger().info(e)
 
-    def get_sheet(self):
+    @staticmethod
+    def get_sheet():
         gc = pygsheets.authorize(
             service_account_file="settings.json")  # This will create a link to authorize
         sh = gc.open_by_url(

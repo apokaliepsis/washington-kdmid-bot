@@ -10,6 +10,7 @@ classes/
 # Log file
 logs
 *.log
+log.txt
 
 # BlueJ files
 *.ctxt
@@ -35,3 +36,4 @@ security.properties
 target
 allure-results
 settings.json
+*.jpg
