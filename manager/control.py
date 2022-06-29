@@ -51,12 +51,12 @@ class Control:
                     client_process_phone = client_process.get("PHONE")
 
                     if client_process_phone == phone and client_process.get("ACTIVE") == 0:
-                        ManagerApp.logger_main.info("Close process for " + name)
+                        ManagerApp.logger_main.info("Close process for " + phone)
                         # driver.close()
                         # Google_Doc.delete_row_from_doc(phone)
                         Data_Base.exec_query("delete from sessions where phone='%s'" % phone)
                         driver.quit()
-                        ManagerApp.logger_main.info("Quit driver for " + name)
+                        ManagerApp.logger_client.info("Quit driver for " + phone)
                         # process_queue.remove(client_process)
                         #Control.execute_bash_command()
                         _thread.interrupt_main()
@@ -388,4 +388,3 @@ class Control:
                 self.stop_all_process()
                 ManagerApp.logger_main.warning("Website "+Authorization.start_page+" unavailable! Wait " + str(time_seconds_wait) + " seconds...")
                 self.disable_monitoring()
-

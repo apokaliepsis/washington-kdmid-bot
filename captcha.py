@@ -7,13 +7,14 @@ import urllib.request
 from PIL import Image, ImageEnhance
 from cffi.backend_ctypes import xrange
 from easyocr import easyocr
-
+from loguru import logger
 
 from manager.manager_app import ManagerApp
 
 
 class Captcha:
     reader = easyocr.Reader(["en"], gpu=False)
+
     def recognize_captcha(self):
         try:
             driver = ManagerApp().get_driver()
@@ -30,7 +31,7 @@ class Captcha:
             print(file_path)
             im = Image.open(file_path)
             enhancer = ImageEnhance.Contrast(im)
-            factor = 2
+            factor = 2.4
             im_output = enhancer.enhance(factor)
             im_output.save(file_path)
 
@@ -78,5 +79,3 @@ class Captcha:
 if __name__ == '__main__':
     from manager.control import Control
     print(Control().get_status_monitoring())
-    print(Captcha().recognize_image("/home/anton/Загрузки/Captcha765.jpg"))
-

@@ -1,7 +1,5 @@
 import random
 
-import logger
-
 from manager.control import Control
 from network_file.google_doc import Google_Doc
 from manager.manager_app import ManagerApp
@@ -188,5 +186,3 @@ class Calendar_Page:
         driver = ManagerApp().get_driver()
 
         driver.find_element_by_xpath("//*[@name='ctl00$MainContent$Button1' and @value='Печать']").click()
-
-

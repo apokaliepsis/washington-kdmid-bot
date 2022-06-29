@@ -64,7 +64,7 @@ async def callback_handler(callback: types.CallbackQuery):
         else:
             await bot_telegram.send_message(chat_id=callback.message.chat.id,
                                             text="Нет запущенных процессов по клиентам")
-    elif callback.data == Menu.stop_process_button:
+    elif callback.data == Menu.stop_all_process_button:
         if len(process_queue_shared)>0:
             yes = InlineKeyboardButton("Да", callback_data="/stopall")
             no = InlineKeyboardButton("Нет", callback_data="<-Назад")
@@ -101,6 +101,7 @@ async def callback_handler(callback: types.CallbackQuery):
                     print("BOT: client_process=", client_process)
                     # process_queue_shared.append({'PHONE': 77777777, 'ACTIVE': 1})
                     print("BOT: process_queue_shared2=", process_queue_shared)
+            await bot_telegram.send_message(chat_id=callback.message.chat.id, text="Процесс остановлен")
         except Exception as e:
             print(e)
 
@@ -165,7 +166,7 @@ async def message_handler(message: types.Message):
 def get_clients_keyboard() -> InlineKeyboardMarkup:
     run_monitoring = InlineKeyboardButton("Включить мониторинг", callback_data="/enablemonitoring")
     process_button = InlineKeyboardButton(Menu.show_process_button, callback_data=Menu.show_process_button)
-    stop_process_button = InlineKeyboardButton(Menu.stop_process_button, callback_data=Menu.stop_process_button)
+    stop_process_button = InlineKeyboardButton(Menu.stop_all_process_button, callback_data=Menu.stop_all_process_button)
     open_client_file_button = InlineKeyboardButton(
         Menu.open_client_file_button,
         url="https://docs.google.com/spreadsheets/d/1qu-TfbUYCaWAmS65yya2yYKttBTTBnWpLjAF5grQtNY/edit#gid=0",

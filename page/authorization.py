@@ -8,8 +8,6 @@ from captcha import Captcha
 import concurrent.futures
 
 
-
-
 class Authorization:
 
     start_page = "http://washington.kdmid.ru/queue/Visitor.aspx"

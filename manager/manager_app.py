@@ -2,7 +2,6 @@ import json
 import os
 from configobj import ConfigObj
 from selenium.webdriver.chrome.options import Options
-from selenium import webdriver
 from webdriver_manager.chrome import ChromeDriverManager
 import logging
 from loguru import logger
