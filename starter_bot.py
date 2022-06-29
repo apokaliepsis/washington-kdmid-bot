@@ -64,6 +64,8 @@ async def callback_handler(callback: types.CallbackQuery):
         else:
             await bot_telegram.send_message(chat_id=callback.message.chat.id,
                                             text="Нет запущенных процессов по клиентам")
+    elif callback.data == Menu.help_button:
+        await send_help_menu(callback.message.chat.id)
     elif callback.data == Menu.stop_all_process_button:
         if len(process_queue_shared)>0:
             yes = InlineKeyboardButton("Да", callback_data="/stopall")
@@ -156,11 +158,21 @@ async def message_handler(message: types.Message):
         keyboard = get_clients_keyboard()
 
         await message.answer(message.text, reply_markup=keyboard)
+    elif message.text == Menu.help_button:
+        await send_help_menu(message.chat.id)
     else:
         btn1 = types.KeyboardButton(Menu.clients_button)
         btn2 = types.KeyboardButton(Menu.help_button)
         keyboard.add(btn1, btn2)
         await message.answer("Главное меню", reply_markup=keyboard)
+
+
+async def send_help_menu(chat_id):
+    await bot_telegram.send_message(chat_id=chat_id,
+                                    text="Добро пожаловать в \"Консул Вашингтон\"!\n\n" +
+                         "Данный бот создан для управления мониторингом Консульского отдела ПосольстваРоссийской Федерации в Вашингтоне.\n\n" +
+                         "Для добавления клиента, перейдите в меню \"Клиенты/Открыть клиентский файл\". И внесите необходимые данные клиента.\n" +
+                         "*для внесения данных, требуются права доступа. Для получения прав, напишите @as_alekseev.")
 
 
 def get_clients_keyboard() -> InlineKeyboardMarkup:
