@@ -23,7 +23,6 @@ class ManagerApp:
     __path_settings_file: str = sys.argv[1]
     __json_data: json = None
 
-    # driver = webdriver.Chrome(seleniumwire_options=options)
     def startDriver(self):
         chrome_options = Options()
         settings = {
@@ -102,6 +101,7 @@ class ManagerApp:
             # sh.setFormatter(formatter)
             # ManagerApp.log.addHandler(sh)
         return ManagerApp.logger
+
     def get_json_data(self):
         if ManagerApp.__json_data is None:
             with open(ManagerApp.__path_settings_file) as f:
