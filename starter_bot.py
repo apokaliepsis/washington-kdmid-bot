@@ -150,9 +150,11 @@ async def message_handler(message: types.Message):
         fio = message.from_user.first_name + " " + message.from_user.last_name
         language_code = message.from_user.language_code
         action_id = "0"
-        Data_Base().exec_query(
-            "insert into configuration (chatid, date, username, fio, language_code, action_id) values ('%s', '%s', '%s', '%s', '%s', '%s')" % (
-                chatid, date, username, fio, language_code, action_id))
+
+        if len(Data_Base.exec_query("select* from configuration where chatid=%s" % chatid))==0:
+            Data_Base().exec_query(
+                "insert into configuration (chatid, date, username, fio, language_code, action_id) values ('%s', '%s', '%s', '%s', '%s', '%s')" % (
+                    chatid, date, username, fio, language_code, action_id))
     elif message.text == Menu.clients_button:
 
         keyboard = get_clients_keyboard()

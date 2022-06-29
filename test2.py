@@ -2,6 +2,7 @@ from time import sleep
 
 from loguru import logger
 
+from data_base import Data_Base
 from manager.manager_app import ManagerApp
 
 a=("dsd",3)
@@ -17,7 +18,8 @@ print(a)
 print(b)
 print(c)
 
-driver = ManagerApp().get_driver()
-#ManagerApp().set_ip_poxy("http://weTPxd:jzzc7M@hub-us-6-1.litport.net:1337")
-ManagerApp().set_ip_poxy("socks5://LCjFKu:kVN3UD@186.65.115.27:9980")
-driver.get("https://whatismyipaddress.com/")
+# driver = ManagerApp().get_driver()
+# #ManagerApp().set_ip_poxy("http://weTPxd:jzzc7M@hub-us-6-1.litport.net:1337")
+# ManagerApp().set_ip_poxy("socks5://LCjFKu:kVN3UD@186.65.115.27:9980")
+# driver.get("https://whatismyipaddress.com/")
+print(len(Data_Base.exec_query("select* from configuration where chatid=%s" % "873327794"))==0)
