@@ -1,5 +1,7 @@
 import random
 
+import logger
+
 from manager.control import Control
 from network_file.google_doc import Google_Doc
 from manager.manager_app import ManagerApp
@@ -79,45 +81,52 @@ class Calendar_Page:
         # print(random_id)
         return radiobutton_list
 
-    def set_date_to_calendar(self, date_order, client_data):
+    def set_date_to_calendar(self, date_order, client_data, process_queue_shared):
         driver = ManagerApp().get_driver()
-        print("date_order=" + date_order)
         user_default_date = time.strptime(self.reset_days_date(date_order), "%d.%m.%Y")
         print(user_default_date)
         while True:
             current_date = time.strptime(self.get_current_date(), "%d.%m.%Y")
             if current_date > user_default_date:
                 print("Найденный месяц больше требуемого")
+                ManagerApp.logger_client.info("Click by next month")
                 driver.find_element_by_xpath("//*[@title='Перейти к предыдущему месяцу']").click()
             elif current_date < user_default_date:
                 print("Найденный месяц меньше требуемого")
+                ManagerApp.logger_client.info("Click by previous month")
                 try:
                     driver.find_element_by_xpath("//*[@title='Перейти к следующему месяцу']").click()
                 except:
-                    ManagerApp().get_logger().warn("Calendar is not available")
+                    ManagerApp.logger_client.warning("Calendar is not available!. Restart process")
                     ManagerApp().get_driver().quit()
-                    Control().get_client_order(client_data)
+                    Control().get_client_order(client_data, process_queue_shared)
 
             else:
                 print("Найденный месяц равен требуемому")
                 break
         self.click_by_day(date_order)
 
-    def select_specific_slot(self, client_data):
-        date_order = Control().get_value_client_from_clients_data(Google_Doc.order_date, client_data.get(Google_Doc.phone))
-        print("date_order="+str(date_order))
-        if str(date_order).__contains__("-") or str(date_order).__contains__(","):
+    def select_specific_slot(self, client, process_queue_shared):
 
+        phone_client = client.get(Google_Doc.phone)
+        #date_order = Control().get_value_client_from_clients_data(Google_Doc.order_date, phone_client)
+        date_order = client.get(Google_Doc.order_date)
+        ManagerApp.logger_client.info(str(client.get(Google_Doc.phone))
+                                            +": Select specific slot: "+"\n"
+                                            +"client_data=" + str(client)+"\n"
+                                            +"phone_client="+str(phone_client)+"\n"
+                                            +"date_order="+str(date_order))
+        if str(date_order).__contains__("-") or str(date_order).__contains__(","):
             dates = self.get_days_from_many_dates(date_order)
             print(dates)
             is_exist_free_slot = False
             while is_exist_free_slot == False:
                 for day in dates:
-                    self.set_date_to_calendar(day, client_data)
-                    is_exist_free_slot = self.wait_free_slot(client_data, True)
+                    self.set_date_to_calendar(day, client, process_queue_shared)
+                    is_exist_free_slot = self.wait_free_slot(client, process_queue_shared, True)
         else:
-            self.set_date_to_calendar(date_order, client_data)
-            self.wait_free_slot(client_data, False)
+            self.set_date_to_calendar(date_order, client, process_queue_shared)
+            self.wait_free_slot(client, process_queue_shared, False)
 
         self.click_by_free_slot()
 
@@ -125,7 +134,7 @@ class Calendar_Page:
         driver = ManagerApp().get_driver()
         radiobutton_list = self.get_radiobutton_id_list()
         choice = random.choice(radiobutton_list)
-        ManagerApp().get_logger().info("Click by day: " + str(choice))
+        ManagerApp.logger_client.info("Click by day: " + str(choice))
         driver.find_element_by_xpath("//*[contains(text(),'%s')]" % choice).click()
 
     def click_by_day(self, user_date):
@@ -133,32 +142,35 @@ class Calendar_Page:
         month = str(self.get_month_sclonen_by_number(str(user_date).split(".")[1]))
         day = str(user_date).split(".")[0]
         date = month + " " + day
-        ManagerApp().get_logger().info("Click by day: " + str(date))
+        ManagerApp.logger_client.info("Click by day: " + str(date))
         driver.find_element_by_xpath("//*[contains(@title,'%s')]" % date).click()
 
-    def wait_free_slot(self, client_data, is_multidates: bool):
+    def wait_free_slot(self, client_data, process_queue_shared, is_multidates: bool):
         driver = ManagerApp().get_driver()
         driver.implicitly_wait(1)
+        time_refresh_page_wait = int(ManagerApp.get_value_from_config("TIME_REFRESH_PAGE_WAIT"))
         if is_multidates == False:
             while len(driver.find_elements_by_xpath(self.table_xpath)) == 0:
-                time_wait = random.randint(60, 80)
-                print("Wait time: " + str(time_wait))
+                ManagerApp.logger_client.info("No available slots. We wait "+str(time_refresh_page_wait)+" seconds")
+                time_wait = random.randint(time_refresh_page_wait-20, time_refresh_page_wait+20)
+                ManagerApp.logger_main.info("Random time set: " + str(time_wait))
                 sleep(time_wait)
                 driver.refresh()
                 if len(driver.find_elements_by_id("ctl00_MainContent_Calendar")) == 0:
-                    ManagerApp().get_logger().info("Calendar not found. Refreshing the page")
+                    ManagerApp.logger_client.info("Calendar not found. Refreshing the page")
                     driver.implicitly_wait(15)
-                    Control().get_client_order(client_data)
+                    Control().get_client_order(client_data, process_queue_shared)
                 if len(driver.find_elements_by_xpath("//*[contains(text(), ' Почему так случилось?')]")) > 0:
                     print("Найдена страница блокировки!")
                     # driver.delete_all_cookies()
                     ManagerApp().quit_driver()
-                    Control().get_client_order(client_data)
+                    Control().get_client_order(client_data, process_queue_shared)
         elif is_multidates == True:
             if len(driver.find_elements_by_xpath(self.table_xpath)) > 0:
                 return True
             else:
-                sleep(random.randint(65, 85))
+                sleep(random.randint(time_refresh_page_wait-20, time_refresh_page_wait+20))
+                ManagerApp.logger_client.info("No available slots. We wait "+str(time_refresh_page_wait)+" seconds")
                 driver.refresh()
             is_exist_free_slot = len(driver.find_elements_by_xpath(self.table_xpath)) > 0
             driver.implicitly_wait(15)
@@ -166,13 +178,13 @@ class Calendar_Page:
         driver.implicitly_wait(15)
 
     def click_by_make_order(self):
-        ManagerApp().get_logger().info("Click by \"Make order\"")
+        ManagerApp.logger_client.info("Click by \"Make order\"")
         driver = ManagerApp().get_driver()
         driver.find_element_by_name("ctl00$MainContent$Button1").click()
 
     def click_by_print(self):
 
-        ManagerApp().get_logger().info("Save order document as screenshot:")
+        ManagerApp.logger_client.info("Save order document as screenshot:")
         driver = ManagerApp().get_driver()
 
         driver.find_element_by_xpath("//*[@name='ctl00$MainContent$Button1' and @value='Печать']").click()

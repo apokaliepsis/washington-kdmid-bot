@@ -1,3 +1,5 @@
+import sys
+
 import pygsheets
 
 from manager.manager_app import ManagerApp
@@ -34,12 +36,12 @@ class Google_Doc:
                     wk1.delete_rows(count)
                 count += 1
         except Exception as e:
-            ManagerApp.get_logger().info(e)
+            ManagerApp.logger_main.info(e)
 
     @staticmethod
     def get_sheet():
         gc = pygsheets.authorize(
-            service_account_file="settings.json")  # This will create a link to authorize
+            service_account_file=sys.argv[1])  # This will create a link to authorize
         sh = gc.open_by_url(
             "https://docs.google.com/spreadsheets/d/1qu-TfbUYCaWAmS65yya2yYKttBTTBnWpLjAF5grQtNY/edit#gid=0")
         wk1 = sh.sheet1

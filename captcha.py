@@ -8,19 +8,19 @@ from PIL import Image, ImageEnhance
 from cffi.backend_ctypes import xrange
 from easyocr import easyocr
 
+
 from manager.manager_app import ManagerApp
 
 
 class Captcha:
+    reader = easyocr.Reader(["en"], gpu=False)
     def recognize_captcha(self):
         try:
             driver = ManagerApp().get_driver()
             captcha_element = driver.find_element_by_id("ctl00_MainContent_imgSecNum")
 
             file = self.get_captcha(driver, captcha_element)
-            print("captcha_file=", file)
             text = self.recognize_image(file)
-            print("Captcha: " + text)
             return text
         except Exception as e:
             print(e)
@@ -33,10 +33,8 @@ class Captcha:
             factor = 2
             im_output = enhancer.enhance(factor)
             im_output.save(file_path)
-            print("im_output=", im_output)
-            reader = easyocr.Reader(["en"], gpu=False)
-            print("reader=", reader)
-            result = reader.readtext(file_path, detail=0, allowlist='0123456789')
+
+            result = Captcha.reader.readtext(file_path, detail=0, allowlist='0123456789')
             print("result=", result)
             self.remove_file(file_path)
             if result == []:
@@ -55,7 +53,7 @@ class Captcha:
             print(e)
 
     def remove_file(self, file_path):
-        ManagerApp().get_logger().info("Remove captcha file: "+file_path)
+        ManagerApp.logger_main.info("Remove captcha file: "+file_path)
         os.remove(file_path)
 
     def save_image(self, url):
@@ -78,10 +76,7 @@ class Captcha:
 
 
 if __name__ == '__main__':
-    # 0111101011
-    #
-    #
-    # img_path = "captcha.jpg"
-    # urllib.request.urlretrieve("http://washington.kdmid.ru/queue/CodeImage.aspx?id=c816", img_path)
-    # print(Captcha.captcha_recognition("captcha.jpg"))
-    print()
+    from manager.control import Control
+    print(Control().get_status_monitoring())
+    print(Captcha().recognize_image("/home/anton/Загрузки/Captcha765.jpg"))
+

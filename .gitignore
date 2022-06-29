@@ -35,5 +35,5 @@ security.properties
 
 target
 allure-results
-settings.json
+auth_keys.json
 *.jpg
