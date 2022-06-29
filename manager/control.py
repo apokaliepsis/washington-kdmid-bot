@@ -125,7 +125,7 @@ class Control:
         ManagerApp.logger_main.info("Delete from sessions client: " + str(client))
         fio = str(client.get(Google_Doc.name)) + " " + str(client.get(Google_Doc.surname))
         Data_Base.exec_query("delete from sessions where fio='%s'" % fio)
-        
+
     @logger.catch()
     def run_main(self):
         self.execute_bash_command("pkill -9 -f chromedriver")
