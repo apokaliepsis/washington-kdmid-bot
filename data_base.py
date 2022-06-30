@@ -62,25 +62,3 @@ class Data_Base:
             cursor.close()
             connection.close()
         return result
-    def exec_query2(query):
-        print(query)
-        db_username = ManagerApp.get_value_from_config("DB_USERNAME")
-        db_password = ManagerApp.get_value_from_config("DB_PASSWORD")
-        db_host = ManagerApp.get_value_from_config("DB_HOST")
-        connection = jaydebeapi.connect(
-            "org.h2.Driver",
-            db_host,
-            [db_username, db_password],
-            "h2-2.0.202.jar")
-        cursor = connection.cursor()
-        data = []
-        try:
-            cursor.execute(query)
-            data = cursor.fetchall()
-            print(data)
-            cursor.close()
-            connection.close()
-        except Exception as e:
-            print("Data_Base except: ",e)
-            ManagerApp.logger_main.warning(e)
-        return data

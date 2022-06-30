@@ -11,6 +11,8 @@ from seleniumwire import webdriver
 
 selenium_logger = logging.getLogger('seleniumwire')
 selenium_logger.setLevel(logging.ERROR)
+# easyocr_logger = logging.getLogger('easyocr')
+# easyocr_logger.setLevel(logging.ERROR)
 
 logger.add("main.log", filter=lambda record: record["extra"].get("name") == "logger_main", format="{time:YYYY-MM-DD HH:mm:ss.SSS} {name} {message}", level="DEBUG", rotation="1 MB")
 logger.add("client.log", filter=lambda record: record["extra"].get("name") == "logger_client", format="{time:YYYY-MM-DD HH:mm:ss.SSS} {name} {message}", level="DEBUG", rotation="1 MB")
@@ -34,7 +36,8 @@ class ManagerApp:
             "selectedDestinationId": "Save as PDF",
             "version": 2
         }
-        path_for_save = os.path.abspath("temp/succes_order/")
+        path_for_order_document = self.get_value_from_config("ORDER_DOCUMENT_PATH")
+        path_for_save = os.path.abspath(path_for_order_document)
         prefs = {
             'printing.print_preview_sticky_settings.appState': json.dumps(settings),
             'savefile.default_directory': path_for_save

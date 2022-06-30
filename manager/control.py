@@ -11,7 +11,7 @@ import re
 import string
 from time import sleep
 
-
+import pygsheets
 from cffi.backend_ctypes import xrange
 from dateutil.parser import parse
 import urllib.request
@@ -40,23 +40,20 @@ class Control:
         return client_data
 
     def control_activity_process(self, process_queue_shared, client, driver):
-        name = self.get_name_surname_from_client(client)
-        phone = client.get(Google_Doc.phone)
-
+        phone:str = client.get(Google_Doc.phone)
         try:
             while True:
                 #logger.info()
                 ManagerApp.logger_main.info("Control_Process: queue="+ str(process_queue_shared))
                 for client_process in process_queue_shared:
-                    client_process_phone = client_process.get("PHONE")
-
+                    client_process_phone:str = client_process.get("PHONE")
                     if client_process_phone == phone and client_process.get("ACTIVE") == 0:
-                        ManagerApp.logger_main.info("Close process for " + phone)
+                        ManagerApp.logger_main.info("Close process for " + str(phone))
                         # driver.close()
                         # Google_Doc.delete_row_from_doc(phone)
                         Data_Base.exec_query("delete from sessions where phone='%s'" % phone)
                         driver.quit()
-                        ManagerApp.logger_client.info("Quit driver for " + phone)
+                        ManagerApp.logger_client.info("Quit driver for " + str(phone))
                         # process_queue.remove(client_process)
                         #Control.execute_bash_command()
                         _thread.interrupt_main()
@@ -77,9 +74,7 @@ class Control:
                 self.add_sessions(client)
                 pid = driver.service.process.pid
                 print("PID=",pid)
-                for item in process_queue_shared:
-                    if client.get(Google_Doc.phone) in item.values():
-                        process_queue_shared.remove(item)
+                self.delete_client_from_process_queue_shared(client, process_queue_shared)
                 process_queue_shared.append({"PHONE": client.get(Google_Doc.phone), "ACTIVE": 1, "PID":pid})
 
                 control_activity_process = Process(
@@ -87,10 +82,10 @@ class Control:
                     name="Control_Process_" + str(client.get(Google_Doc.phone)), args=(process_queue_shared, client, driver))
                 control_activity_process.start()
 
-                #ManagerApp().set_ip_poxy("socks5://4sdBGU:E3F6K7@181.177.86.241:9526")
-                # ManagerApp().set_ip_poxy("socks5://70KAot:7u6J69@hub-us-6-1.litport.net:5337")
-                # ManagerApp().set_ip_poxy("socks5://LCjFKu:kVN3UD@186.65.115.27:9980")
-                #ManagerApp().set_ip_poxy("socks5://weTPxd:jzzc7M@hub-us-6-1.litport.net:5512")
+                ###ManagerApp().set_ip_poxy("socks5://4sdBGU:E3F6K7@181.177.86.241:9526")
+                ###ManagerApp().set_ip_poxy("socks5://70KAot:7u6J69@hub-us-6-1.litport.net:5337")
+                ###ManagerApp().set_ip_poxy("socks5://LCjFKu:kVN3UD@186.65.115.27:9980")
+                ###ManagerApp().set_ip_poxy("socks5://weTPxd:jzzc7M@hub-us-6-1.litport.net:5512")
 
                 Authorization().authorize(client)
                 Consul_Services().go_to_for_get_passport(client)
@@ -98,15 +93,16 @@ class Control:
                 Calendar_Page().click_by_make_order()
                 driver.implicitly_wait(600)
                 Calendar_Page().click_by_print()
-                self.save_current_page_as_pdf(client)
+                order_file_path = self.save_current_page_as_pdf(client)
                 driver.implicitly_wait(15)
-                Google_Doc().delete_row_from_doc(client.get(Google_Doc.phone))
+                starter_bot.send_file(order_file_path,"873327794")
 
+                os.remove(order_file_path)
+                Google_Doc().delete_row_gspread(client.get(Google_Doc.phone))
                 ManagerApp().quit_driver()
-
-                # sleep(600)
+                self.delete_client_from_process_queue_shared(client, process_queue_shared)
                 self.delete_client_from_sessions(client)
-                control_activity_process.terminate()
+                control_activity_process.kill()
                 ManagerApp.logger_client.info(str(client.get(Google_Doc.phone))+": Successfully")
                 sys.exit()
             else:
@@ -120,6 +116,12 @@ class Control:
             sleep(5)
             client = self.get_client_from_clients_data(client.get(Google_Doc.phone))
             self.get_client_order(client, process_queue_shared)
+
+    def delete_client_from_process_queue_shared(self, client, process_queue_shared):
+        ManagerApp.logger_client.info("Delete client from process_queue_shared")
+        for item in process_queue_shared:
+            if client.get(Google_Doc.phone) in item.values():
+                process_queue_shared.remove(item)
 
     def delete_client_from_sessions(self, client):
         ManagerApp.logger_main.info("Delete from sessions client: " + str(client))
@@ -154,6 +156,7 @@ class Control:
         return Data_Base.exec_query("update settings set monitoring_status=0")
     def control_sessions_queue(self):
         try:
+            ManagerApp.logger_client.info("Running process: "+str(multiprocessing.active_children()))
             ManagerApp.logger_main.info("Control sessions queue: process_queue_shared="+ str(Control.process_queue_shared))
             for client in Control.process_queue_shared:
                 #print("control_sessions: client=", client)
@@ -356,11 +359,23 @@ class Control:
 
     def save_current_page_as_pdf(self, client):
         driver = ManagerApp().get_driver()
-        ManagerApp.logger_client.info(str(client.get(Google_Doc.phone))+": Save current page as pdf")
-        ManagerApp.logger_client.info(driver.find_element_by_css_selector("#Label_Message").text)
+        phone = str(client.get(Google_Doc.phone))
+        ManagerApp.logger_client.info(phone+": Save current page as pdf")
+        #ManagerApp.logger_client.info(driver.find_element_by_css_selector("#Label_Message").text)
         name_title = str(client.get(Google_Doc.name)) + "_" + str(client.get(Google_Doc.surname))
         driver.execute_script('document.title = "%s"' % name_title)
         driver.execute_script('window.print();')
+        document_pdf = os.path.abspath(ManagerApp.get_value_from_config("ORDER_DOCUMENT_PATH")+name_title + ".pdf")
+        ManagerApp.logger_client.info(str(phone)+": document_pdf="+document_pdf)
+        for i in range(10):
+            if os.path.exists(document_pdf):
+                ManagerApp.logger_client.info("Document pdf created: " + document_pdf)
+                break
+            else: sleep(2)
+        if os.path.exists(document_pdf) == False:
+            ManagerApp.logger_client.info(phone+": Error! Document pdf don't created! " + document_pdf)
+            return None
+        return document_pdf
 
     def execute_bash_command(self, command):
         ManagerApp.logger_main.info("Execute bash-command: "+command)
@@ -372,7 +387,6 @@ class Control:
             ManagerApp.logger_main.error(e)
 
     def check_available_site(self):
-
         time_seconds_wait = 60
         while True:
             ManagerApp.logger_main.info("Checking the availability of the site " + Authorization.start_page)

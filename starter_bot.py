@@ -99,7 +99,7 @@ async def callback_handler(callback: types.CallbackQuery):
                     print("BOT: process_queue_shared1=", process_queue_shared)
                     client_process["ACTIVE"] = 0
                     process_queue_shared[index] = client_process
-                    Google_Doc.delete_row_from_doc(phone_client)
+                    Google_Doc().delete_row_gspread(phone_client)
                     print("BOT: client_process=", client_process)
                     # process_queue_shared.append({'PHONE': 77777777, 'ACTIVE': 1})
                     print("BOT: process_queue_shared2=", process_queue_shared)
@@ -174,8 +174,7 @@ async def send_help_menu(chat_id):
                                     text="Добро пожаловать в \"Консул Вашингтон\"!\n\n" +
                          "Данный бот создан для управления мониторингом Консульского отдела ПосольстваРоссийской Федерации в Вашингтоне.\n\n" +
                          "Для добавления клиента, перейдите в меню \"Клиенты/Открыть клиентский файл\". И внесите необходимые данные клиента.\n" +
-                         "*для внесения данных, требуются права доступа. Для получения прав, напишите @as_alekseev.")
-
+                         "*для внесения данных, требуются права доступа. Для получения прав, напишите - @as_alekseev.")
 
 def get_clients_keyboard() -> InlineKeyboardMarkup:
     run_monitoring = InlineKeyboardButton("Включить мониторинг", callback_data="/enablemonitoring")
@@ -183,7 +182,7 @@ def get_clients_keyboard() -> InlineKeyboardMarkup:
     stop_process_button = InlineKeyboardButton(Menu.stop_all_process_button, callback_data=Menu.stop_all_process_button)
     open_client_file_button = InlineKeyboardButton(
         Menu.open_client_file_button,
-        url="https://docs.google.com/spreadsheets/d/1qu-TfbUYCaWAmS65yya2yYKttBTTBnWpLjAF5grQtNY/edit#gid=0",
+        url=ManagerApp().get_json_data()["document_url"],
         callback_data=Menu.open_client_file_button)
     back_button = InlineKeyboardButton("Назад", callback_data="Назад")
     if int(Data_Base.get_data_by_query("select* from settings")[0].get("MONITORING_STATUS")) == 0:
@@ -214,3 +213,8 @@ def start_bot(process_queue):
     Control().enable_monitoring()
     starter_bot.process_queue_shared = process_queue
     executor.start_polling(dp, skip_updates=True, on_startup=on_startup)
+def send_file(path_file, chat_id):
+    from manager.control import Control
+    ManagerApp.logger_client.info("Send file to telegram")
+    Control().execute_bash_command(
+        ("curl -F document=@%s https://api.telegram.org/bot5492437032:AAHVQLoSIUClhxwKhDOFIhuj81tSjQM8MRw/sendDocument?chat_id=" + chat_id) % path_file)
