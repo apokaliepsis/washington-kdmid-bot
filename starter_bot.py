@@ -216,5 +216,6 @@ def start_bot(process_queue):
 def send_file(path_file, chat_id):
     from manager.control import Control
     ManagerApp.logger_client.info("Send file to telegram")
+
     Control().execute_bash_command(
-        ("curl -F document=@%s https://api.telegram.org/bot5492437032:AAHVQLoSIUClhxwKhDOFIhuj81tSjQM8MRw/sendDocument?chat_id=" + chat_id) % path_file)
+        (("curl -F document=@%s https://api.telegram.org/bot" + BOT_TOKEN + "/sendDocument?chat_id=") + chat_id) % path_file)
