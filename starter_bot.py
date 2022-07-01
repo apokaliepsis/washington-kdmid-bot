@@ -5,6 +5,8 @@ from time import sleep
 import requests
 import starter_bot
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup, Update, KeyboardButton
+
+
 from manager.manager_app import ManagerApp
 from network_file.google_doc import Google_Doc
 from data_base import Data_Base
@@ -201,7 +203,10 @@ def send_message(chat_id, text):
 def start_bot(process_queue):
     from manager.control import Control
     ManagerApp.logger_main.info("Start bot")
-
+    Control().delete_sessions()
+    Control().delete_temp_files()
+    Control().enable_monitoring()
+    Control().create_dir_temp()
     starter_bot.process_queue_shared = process_queue
     executor.start_polling(dp, skip_updates=True, on_startup=on_startup)
 def send_file(path_file, chat_id):

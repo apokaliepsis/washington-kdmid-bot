@@ -132,10 +132,7 @@ class Control:
     @logger.catch()
     def run_main(self):
         self.execute_bash_command("pkill -9 -f chromedriver")
-        self.delete_sessions()
-        self.delete_temp_files()
-        self.enable_monitoring()
-        self.create_dir_temp()
+
         bot_process = Process(target=start_bot, name="Bot", args=(Control.process_queue_shared,))
         bot_process.start()
 
