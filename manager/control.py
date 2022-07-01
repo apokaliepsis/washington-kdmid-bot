@@ -2,6 +2,7 @@ import _thread
 import glob
 
 import multiprocessing
+import shutil
 import subprocess
 import sys
 from multiprocessing import Process
@@ -69,7 +70,7 @@ class Control:
         try:
             if self.check_valid(client):
                 ManagerApp.logger_client.info("Started process for " + self.get_name_surname_from_client(client))
-                ManagerApp().set_ip_poxy(ManagerApp().get_json_data()["proxy_url"])
+                ManagerApp().set_ip_poxy(ManagerApp.get_json_data()["proxy_url"])
                 driver = ManagerApp().get_driver()
                 self.add_sessions(client)
                 pid = driver.service.process.pid
@@ -131,7 +132,10 @@ class Control:
     @logger.catch()
     def run_main(self):
         self.execute_bash_command("pkill -9 -f chromedriver")
-
+        self.delete_sessions()
+        self.delete_temp_files()
+        self.enable_monitoring()
+        self.create_dir_temp()
         bot_process = Process(target=start_bot, name="Bot", args=(Control.process_queue_shared,))
         bot_process.start()
 
@@ -156,7 +160,7 @@ class Control:
         return Data_Base.exec_query("update settings set monitoring_status=0")
     def control_sessions_queue(self):
         try:
-            ManagerApp.logger_client.info("Running process: "+str(multiprocessing.active_children()))
+            ManagerApp.logger_main.info("Running process: "+str(multiprocessing.active_children()))
             ManagerApp.logger_main.info("Control sessions queue: process_queue_shared="+ str(Control.process_queue_shared))
             for client in Control.process_queue_shared:
                 #print("control_sessions: client=", client)
@@ -349,19 +353,16 @@ class Control:
         driver.save_screenshot(screen)
         return screen
 
-    def delete_temp_files_from(self):
-        folders = ["temp/captcha_img/*", "temp/succes_order/*"]
-        ManagerApp.logger_main.info("Deleting temporary files: " + str(folders))
-        for folder in folders:
-            files = glob.glob(folder)
-            for f in files:
-                os.remove(f)
+    def delete_temp_files(self):
+        ManagerApp.logger_main.info("Delete temp directory")
+        if os.path.exists("temp/"):
+            shutil.rmtree(os.path.abspath("temp/"))
 
     def save_current_page_as_pdf(self, client):
         driver = ManagerApp().get_driver()
         phone = str(client.get(Google_Doc.phone))
         ManagerApp.logger_client.info(phone+": Save current page as pdf")
-        #ManagerApp.logger_client.info(driver.find_element_by_css_selector("#Label_Message").text)
+        ManagerApp.logger_client.info(driver.find_element_by_css_selector("#Label_Message").text)
         name_title = str(client.get(Google_Doc.name)) + "_" + str(client.get(Google_Doc.surname))
         driver.execute_script('document.title = "%s"' % name_title)
         driver.execute_script('window.print();')
@@ -403,3 +404,11 @@ class Control:
                 self.stop_all_process()
                 ManagerApp.logger_main.warning("Website "+Authorization.start_page+" unavailable! Wait " + str(time_seconds_wait) + " seconds...")
                 self.disable_monitoring()
+
+    def create_dir_temp(self):
+        ManagerApp.logger_main.info("Create temp directory")
+        order = ManagerApp.get_value_from_config("ORDER_DOCUMENT_PATH")
+        captcha = ManagerApp.get_value_from_config("CAPTCHA_PATH")
+        if os.path.exists("temp") == False:
+            os.makedirs(os.path.abspath(order))
+            os.makedirs(os.path.abspath(captcha))

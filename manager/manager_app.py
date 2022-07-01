@@ -105,7 +105,8 @@ class ManagerApp:
             # ManagerApp.log.addHandler(sh)
         return ManagerApp.logger
 
-    def get_json_data(self):
+    @staticmethod
+    def get_json_data():
         if ManagerApp.__json_data is None:
             with open(ManagerApp.__path_settings_file) as f:
                 ManagerApp.__json_data = json.load(f)

@@ -59,7 +59,7 @@ class Captcha:
 
     def save_image(self, url):
 
-        img_path = str("temp/captcha_img/") + "".join([random.choice(string.ascii_letters) for i in xrange(10)]) + str(".jpg")
+        img_path = ManagerApp.get_value_from_config("CAPTCHA_PATH") + "".join([random.choice(string.ascii_letters) for i in xrange(10)]) + str(".jpg")
         return urllib.request.urlretrieve(url, img_path)[0]
 
     def get_captcha(self, driver, captcha_element):

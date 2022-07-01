@@ -182,7 +182,7 @@ class Calendar_Page:
 
     def click_by_print(self):
 
-        ManagerApp.logger_client.info("Save order document as screenshot:")
+        ManagerApp.logger_client.info("Save order document as pdf")
         driver = ManagerApp().get_driver()
 
         driver.find_element_by_xpath("//*[@name='ctl00$MainContent$Button1' and @value='Печать']").click()

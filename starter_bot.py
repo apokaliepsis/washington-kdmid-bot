@@ -19,7 +19,7 @@ from aiogram import Bot, Dispatcher, executor, types
 
 from tg_bot.menu import Menu
 
-BOT_TOKEN = ManagerApp().get_json_data()["bot_token"]
+BOT_TOKEN = ManagerApp.get_json_data()["bot_token"]
 admin_chat_id = "873327794"
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -182,7 +182,7 @@ def get_clients_keyboard() -> InlineKeyboardMarkup:
     stop_process_button = InlineKeyboardButton(Menu.stop_all_process_button, callback_data=Menu.stop_all_process_button)
     open_client_file_button = InlineKeyboardButton(
         Menu.open_client_file_button,
-        url=ManagerApp().get_json_data()["document_url"],
+        url=ManagerApp.get_json_data()["document_url"],
         callback_data=Menu.open_client_file_button)
     back_button = InlineKeyboardButton("Назад", callback_data="Назад")
     if int(Data_Base.get_data_by_query("select* from settings")[0].get("MONITORING_STATUS")) == 0:
@@ -208,9 +208,7 @@ def send_message(chat_id, text):
 def start_bot(process_queue):
     from manager.control import Control
     ManagerApp.logger_main.info("Start bot")
-    Control().delete_sessions()
-    Control().delete_temp_files_from()
-    Control().enable_monitoring()
+
     starter_bot.process_queue_shared = process_queue
     executor.start_polling(dp, skip_updates=True, on_startup=on_startup)
 def send_file(path_file, chat_id):
