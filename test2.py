@@ -1,9 +1,17 @@
+import os
+
+import requests
+
+
 from time import sleep
 
 from loguru import logger
 
+import starter_bot
 from data_base import Data_Base
+from manager.control import Control
 from manager.manager_app import ManagerApp
+from network_file.google_doc import Google_Doc
 
 a=("dsd",3)
 b = ["sdf",323]
@@ -22,4 +30,5 @@ print(c)
 # #ManagerApp().set_ip_poxy("http://weTPxd:jzzc7M@hub-us-6-1.litport.net:1337")
 # ManagerApp().set_ip_poxy("socks5://LCjFKu:kVN3UD@186.65.115.27:9980")
 # driver.get("https://whatismyipaddress.com/")
-print(len(Data_Base.exec_query("select* from configuration where chatid=%s" % "873327794"))==0)
+#starter_bot.send_file("client.log","873327794")
+Google_Doc.delete_row_from_doc("6633443")
