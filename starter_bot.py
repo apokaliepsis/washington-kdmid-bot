@@ -2,21 +2,14 @@ import asyncio
 import multiprocessing
 from datetime import datetime
 from time import sleep
-
 import requests
-
 import starter_bot
-from aiogram.dispatcher import FSMContext
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup, Update, KeyboardButton
-from multiprocessing import Queue, Process
-
-
 from manager.manager_app import ManagerApp
 from network_file.google_doc import Google_Doc
 from data_base import Data_Base
 import logging
 from aiogram import Bot, Dispatcher, executor, types
-
 from tg_bot.menu import Menu
 
 BOT_TOKEN = ManagerApp.get_json_data()["bot_token"]
