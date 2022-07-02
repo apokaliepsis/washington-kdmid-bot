@@ -181,6 +181,7 @@ class Calendar_Page:
 
     def refresh_page(self, driver, phone):
         ManagerApp.logger_client.info(phone + ": Refresh page")
+        driver.refresh()
         if str(urllib.request.urlopen(Authorization.start_page).getcode()) != "200":
             ManagerApp.logger_client.info(str(phone)+": Network not available! Wait...")
             sleep(30)

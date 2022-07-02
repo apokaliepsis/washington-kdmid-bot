@@ -44,7 +44,7 @@ class Control:
         phone:str = client.get(Google_Doc.phone)
         try:
             while True:
-                ManagerApp.logger_main.info("Control_Process: queue="+ str(process_queue_shared))
+                ManagerApp.logger_main.info(phone+ ": Control_Process: queue="+ str(process_queue_shared))
                 for client_process in process_queue_shared:
                     client_process_phone:str = client_process.get("PHONE")
                     if client_process_phone == phone and client_process.get("ACTIVE") == 0:
