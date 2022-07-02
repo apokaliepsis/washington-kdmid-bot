@@ -195,7 +195,6 @@ async def send_text(text):
     await bot_telegram.send_message(chat_id=admin_chat_id, text=text)
 
 def send_message(chat_id, text):
-    #asyncio.run(send_text(text))
     send_text = 'https://api.telegram.org/bot' + BOT_TOKEN + '/sendMessage?chat_id=' + chat_id + '&parse_mode=Markdown&text=' + text
     response = requests.get(send_text)
     return response.json()
