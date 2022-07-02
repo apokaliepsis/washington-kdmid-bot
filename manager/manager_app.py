@@ -24,6 +24,7 @@ class ManagerApp:
     __options = None
     __path_settings_file: str = sys.argv[1]
     __json_data: json = None
+    time_implicit_wait = 25
 
     def startDriver(self):
         chrome_options = Options()
@@ -59,7 +60,7 @@ class ManagerApp:
         ManagerApp.logger_main.info("Proxy: " + str(self.__options))
         self.__driver = webdriver.Chrome(executable_path=ChromeDriverManager().install(),
                                          chrome_options=chrome_options, seleniumwire_options=self.__options)
-        self.__driver.implicitly_wait(15)
+        self.__driver.implicitly_wait(ManagerApp.time_implicit_wait)
         ManagerApp.logger_main.info("session_id: " + self.__driver.session_id)
         return self.__driver
 
@@ -70,7 +71,8 @@ class ManagerApp:
                 # 'http': 'http://64.227.14.149:80'
                 'https': ip
                 # 'no_proxy': 'localhost,127.0.0.1'
-            }
+            },
+            'connection_timeout': 25
         }
         ManagerApp.logger_main.info("Proxy: "+str(ManagerApp.__options))
 

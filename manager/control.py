@@ -44,7 +44,6 @@ class Control:
         phone:str = client.get(Google_Doc.phone)
         try:
             while True:
-                #logger.info()
                 ManagerApp.logger_main.info("Control_Process: queue="+ str(process_queue_shared))
                 for client_process in process_queue_shared:
                     client_process_phone:str = client_process.get("PHONE")
@@ -95,7 +94,7 @@ class Control:
                 driver.implicitly_wait(600)
                 Calendar_Page().click_by_print()
                 order_file_path = self.save_current_page_as_pdf(client)
-                driver.implicitly_wait(15)
+                driver.implicitly_wait(ManagerApp.time_implicit_wait)
                 starter_bot.send_file(order_file_path,"873327794")
 
                 os.remove(order_file_path)
@@ -109,10 +108,11 @@ class Control:
             else:
                 ManagerApp.logger_main.warning("Incorrect client data: " + str(client))
         except Exception as e:
-            ManagerApp.logger_main.error("Unexpected error:"+str(e)+"\nRestart client thread")
+            ManagerApp.logger_main.error("Unexpected error: "+str(e)+"\nRestart client thread")
             for index, client_process in enumerate(process_queue_shared):
-                client_process["ACTIVE"] = 0
-                process_queue_shared[index] = client_process
+                if client_process["PHONE"] == client.get(Google_Doc.phone):
+                    client_process["ACTIVE"] = 0
+                    process_queue_shared[index] = client_process
             ManagerApp().quit_driver()
             sleep(5)
             client = self.get_client_from_clients_data(client.get(Google_Doc.phone))
@@ -138,14 +138,17 @@ class Control:
 
         Control.__client_data_list = Google_Doc().get_google_doc_data()
         while True:
-            if int(self.get_status_monitoring())==1:
-                self.check_available_site()
-                if int(self.get_status_monitoring()) == 1 and Control.__client_data_list is not None and len(
-                        Control.__client_data_list) > 0:
-                    self.start_clients_threads(self.get_client_data())
-                Control.__client_data_list = Google_Doc().get_google_doc_data()
-                self.control_sessions_queue()
-            sleep(5)
+            try:
+                if int(self.get_status_monitoring()) == 1:
+                    self.check_available_site()
+                    if int(self.get_status_monitoring()) == 1 and Control.__client_data_list is not None and len(
+                            Control.__client_data_list) > 0:
+                        self.start_clients_threads(self.get_client_data())
+                    Control.__client_data_list = Google_Doc().get_google_doc_data()
+                    self.control_sessions_queue()
+                sleep(5)
+            except Exception as e:
+                ManagerApp.logger_main.error("Network problems")
 
     def get_status_monitoring(self):
         return Data_Base.get_data_by_query("select* from settings")[0].get("MONITORING_STATUS")
@@ -399,8 +402,10 @@ class Control:
                     sleep(time_seconds_wait)
             except Exception as e:
                 self.stop_all_process()
+                Control.process_queue_shared = multiprocessing.Manager().list()
                 ManagerApp.logger_main.warning("Website "+Authorization.start_page+" unavailable! Wait " + str(time_seconds_wait) + " seconds...")
                 self.disable_monitoring()
+                sleep(time_seconds_wait)
 
     def create_dir_temp(self):
         ManagerApp.logger_main.info("Create temp directory")

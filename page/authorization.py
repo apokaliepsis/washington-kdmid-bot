@@ -55,7 +55,7 @@ class Authorization:
                 break
             ManagerApp.logger_client.info(str(client.get(Google_Doc.phone))+": Captcha was entered incorrectly")
             #driver.refresh()
-        driver.implicitly_wait(15)
+        driver.implicitly_wait(ManagerApp.time_implicit_wait)
         ManagerApp.logger_client.info(str(client.get(Google_Doc.phone))+": Captcha passed")
 
     def set_birth_date(self, birth_date):
