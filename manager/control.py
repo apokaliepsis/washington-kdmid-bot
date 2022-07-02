@@ -148,7 +148,10 @@ class Control:
                     self.control_sessions_queue()
                 sleep(5)
             except Exception as e:
-                ManagerApp.logger_main.error("Network problems")
+                time_wait = 10
+                ManagerApp.logger_main.error("Network problems. Wait %s seconds" % str(time_wait))
+                ManagerApp.logger_main.error(e)
+                sleep(time_wait)
 
     def get_status_monitoring(self):
         return Data_Base.get_data_by_query("select* from settings")[0].get("MONITORING_STATUS")

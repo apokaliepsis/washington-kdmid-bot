@@ -6,6 +6,8 @@ from manager.manager_app import ManagerApp
 from datetime import datetime, timedelta
 import time
 from time import sleep
+import urllib.request
+from page.authorization import Authorization
 
 
 class Calendar_Page:
@@ -154,8 +156,7 @@ class Calendar_Page:
                 time_wait = random.randint(time_refresh_page_wait-20, time_refresh_page_wait+20)
                 ManagerApp.logger_client.info(phone + ": Random time set " + str(time_wait))
                 sleep(time_wait)
-                ManagerApp.logger_client.info(phone + ": Refresh page")
-                driver.refresh()
+                self.refresh_page(driver, phone)
                 if len(driver.find_elements_by_id("ctl00_MainContent_Calendar")) == 0:
                     ManagerApp.logger_client.info(phone+": Calendar not found. Refreshing the page")
 
@@ -172,12 +173,19 @@ class Calendar_Page:
             else:
                 sleep(random.randint(time_refresh_page_wait-20, time_refresh_page_wait+20))
                 ManagerApp.logger_client.info(phone+": No available slots. We wait "+str(time_refresh_page_wait)+" seconds")
-                ManagerApp.logger_client.info(phone + ": Refresh page")
-                driver.refresh()
+                self.refresh_page(driver, phone)
             is_exist_free_slot = len(driver.find_elements_by_xpath(self.table_xpath)) > 0
             driver.implicitly_wait(ManagerApp.time_implicit_wait)
             return is_exist_free_slot
         driver.implicitly_wait(ManagerApp.time_implicit_wait)
+
+    def refresh_page(self, driver, phone):
+        ManagerApp.logger_client.info(phone + ": Refresh page")
+        if str(urllib.request.urlopen(Authorization.start_page).getcode()) != "200":
+            ManagerApp.logger_client.info(str(phone)+": Network not available! Wait...")
+            sleep(30)
+            driver.refresh()
+        else: driver.refresh()
 
     def click_by_make_order(self):
         ManagerApp.logger_client.info("Click by \"Make order\"")
