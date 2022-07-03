@@ -6,8 +6,6 @@ from manager.manager_app import ManagerApp
 from datetime import datetime, timedelta
 import time
 from time import sleep
-import urllib.request
-from page.authorization import Authorization
 
 
 class Calendar_Page:
@@ -146,47 +144,46 @@ class Calendar_Page:
         driver.find_element_by_xpath("//*[contains(@title,'%s')]" % date).click()
 
     def wait_free_slot(self, client_data, process_queue_shared, is_multidates: bool):
-        driver = ManagerApp().get_driver()
-        phone = str(client_data.get(Google_Doc.phone))
-        driver.implicitly_wait(1)
-        time_refresh_page_wait = int(ManagerApp.get_value_from_config("TIME_REFRESH_PAGE_WAIT"))
-        if is_multidates == False:
-            while len(driver.find_elements_by_xpath(self.table_xpath)) == 0:
-                ManagerApp.logger_client.info(phone+": No available slots. We wait "+str(time_refresh_page_wait)+" seconds")
-                time_wait = random.randint(time_refresh_page_wait-20, time_refresh_page_wait+20)
-                ManagerApp.logger_client.info(phone + ": Random time set " + str(time_wait))
-                sleep(time_wait)
-                self.refresh_page(driver, phone)
-                if len(driver.find_elements_by_id("ctl00_MainContent_Calendar")) == 0:
-                    ManagerApp.logger_client.info(phone+": Calendar not found. Refreshing the page")
+        try:
+            driver = ManagerApp().get_driver()
+            phone = str(client_data.get(Google_Doc.phone))
+            driver.implicitly_wait(1)
+            time_refresh_page_wait = int(ManagerApp.get_value_from_config("TIME_REFRESH_PAGE_WAIT"))
+            if is_multidates == False:
+                while len(driver.find_elements_by_xpath(self.table_xpath)) == 0:
+                    ManagerApp.logger_client.info(
+                        phone + ": No available slots. We wait " + str(time_refresh_page_wait) + " seconds")
+                    time_wait = random.randint(time_refresh_page_wait - 20, time_refresh_page_wait + 20)
+                    ManagerApp.logger_client.info(phone + ": Random time set " + str(time_wait))
+                    sleep(time_wait)
+                    ManagerApp.logger_client.info(phone + ": Refresh page")
+                    driver.refresh()
+                    if len(driver.find_elements_by_id("ctl00_MainContent_Calendar")) == 0:
+                        ManagerApp.logger_client.info(phone + ": Calendar not found. Refreshing the page")
 
-                    driver.implicitly_wait(ManagerApp.time_implicit_wait)
-                    Control().get_client_order(client_data, process_queue_shared)
-                if len(driver.find_elements_by_xpath("//*[contains(text(), ' Почему так случилось?')]")) > 0:
-                    print("Найдена страница блокировки!")
-                    # driver.delete_all_cookies()
-                    ManagerApp().quit_driver()
-                    Control().get_client_order(client_data, process_queue_shared)
-        elif is_multidates == True:
-            if len(driver.find_elements_by_xpath(self.table_xpath)) > 0:
-                return True
-            else:
-                sleep(random.randint(time_refresh_page_wait-20, time_refresh_page_wait+20))
-                ManagerApp.logger_client.info(phone+": No available slots. We wait "+str(time_refresh_page_wait)+" seconds")
-                self.refresh_page(driver, phone)
-            is_exist_free_slot = len(driver.find_elements_by_xpath(self.table_xpath)) > 0
+                        driver.implicitly_wait(ManagerApp.time_implicit_wait)
+                        Control().get_client_order(client_data, process_queue_shared)
+                    if len(driver.find_elements_by_xpath("//*[contains(text(), ' Почему так случилось?')]")) > 0:
+                        ManagerApp.logger_client.warning("Найдена страница блокировки!")
+                        # driver.delete_all_cookies()
+                        ManagerApp().quit_driver()
+                        Control().get_client_order(client_data, process_queue_shared)
+            elif is_multidates == True:
+                if len(driver.find_elements_by_xpath(self.table_xpath)) > 0:
+                    return True
+                else:
+                    sleep(random.randint(time_refresh_page_wait - 20, time_refresh_page_wait + 20))
+                    ManagerApp.logger_client.info(
+                        phone + ": No available slots. We wait " + str(time_refresh_page_wait) + " seconds")
+                    ManagerApp.logger_client.info(phone + ": Refresh page")
+                    driver.refresh()
+                is_exist_free_slot = len(driver.find_elements_by_xpath(self.table_xpath)) > 0
+                driver.implicitly_wait(ManagerApp.time_implicit_wait)
+                return is_exist_free_slot
             driver.implicitly_wait(ManagerApp.time_implicit_wait)
-            return is_exist_free_slot
-        driver.implicitly_wait(ManagerApp.time_implicit_wait)
-
-    def refresh_page(self, driver, phone):
-        ManagerApp.logger_client.info(phone + ": Refresh page")
-        driver.refresh()
-        if str(urllib.request.urlopen(Authorization.start_page).getcode()) != "200":
-            ManagerApp.logger_client.info(str(phone)+": Network not available! Wait...")
-            sleep(30)
-            driver.refresh()
-        else: driver.refresh()
+        except Exception as e:
+            ManagerApp.logger_client.error("Error client waiting: "+str(e))
+        ManagerApp.logger_client.info("Exit from loop waiting")
 
     def click_by_make_order(self):
         ManagerApp.logger_client.info("Click by \"Make order\"")

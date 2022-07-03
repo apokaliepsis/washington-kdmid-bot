@@ -40,15 +40,15 @@ class Control:
 
         return client_data
 
-    def control_activity_process(self, process_queue_shared, client, driver):
+    def control_client_process(self, process_queue_shared, client, driver):
         phone:str = client.get(Google_Doc.phone)
         try:
             while True:
-                ManagerApp.logger_main.info(phone+ ": Control_Process: queue="+ str(process_queue_shared))
+                ManagerApp.logger_client.info(phone+ ": Control_Client_Process: queue="+ str(process_queue_shared))
                 for client_process in process_queue_shared:
                     client_process_phone:str = client_process.get("PHONE")
                     if client_process_phone == phone and client_process.get("ACTIVE") == 0:
-                        ManagerApp.logger_main.info("Close process for " + str(phone))
+                        ManagerApp.logger_client.info("Close process for " + str(phone))
                         # driver.close()
                         # Google_Doc.delete_row_from_doc(phone)
                         Data_Base.exec_query("delete from sessions where phone='%s'" % phone)
@@ -78,8 +78,8 @@ class Control:
                 process_queue_shared.append({"PHONE": client.get(Google_Doc.phone), "ACTIVE": 1, "PID":pid})
 
                 control_activity_process = Process(
-                    target=Control().control_activity_process,
-                    name="Control_Process_" + str(client.get(Google_Doc.phone)), args=(process_queue_shared, client, driver))
+                    target=Control().control_client_process,
+                    name="Control_Client_Process_" + str(client.get(Google_Doc.phone)), args=(process_queue_shared, client, driver))
                 control_activity_process.start()
 
                 ###ManagerApp().set_ip_poxy("socks5://4sdBGU:E3F6K7@181.177.86.241:9526")

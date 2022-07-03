@@ -187,7 +187,6 @@ def get_clients_keyboard() -> InlineKeyboardMarkup:
                                                      back_button)
     return keyboard
 
-
 async def on_startup(_):
     await bot_telegram.send_message(admin_chat_id, "Запустился")
 
