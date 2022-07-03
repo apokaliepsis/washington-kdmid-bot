@@ -59,7 +59,8 @@ class Control:
                         _thread.interrupt_main()
                 sleep(5)
         except Exception as e:
-            ManagerApp.logger_main.warning(e)
+            ManagerApp.logger_client.warning(phone+ ": Error control_client_process!")
+            ManagerApp.logger_client.warning(str(phone)+": "+str(e))
 
     def get_name_surname_from_client(self, client):
         return str(client.get(Google_Doc.name) + " " + client.get(Google_Doc.surname))
@@ -77,10 +78,10 @@ class Control:
                 self.delete_client_from_process_queue_shared(client, process_queue_shared)
                 process_queue_shared.append({"PHONE": client.get(Google_Doc.phone), "ACTIVE": 1, "PID":pid})
 
-                control_activity_process = Process(
-                    target=Control().control_client_process,
+                control_client_activity_process = Process(
+                    target=self.control_client_process,
                     name="Control_Client_Process_" + str(client.get(Google_Doc.phone)), args=(process_queue_shared, client, driver))
-                control_activity_process.start()
+                control_client_activity_process.start()
 
                 ###ManagerApp().set_ip_poxy("socks5://4sdBGU:E3F6K7@181.177.86.241:9526")
                 ###ManagerApp().set_ip_poxy("socks5://70KAot:7u6J69@hub-us-6-1.litport.net:5337")
@@ -102,7 +103,7 @@ class Control:
                 ManagerApp().quit_driver()
                 self.delete_client_from_process_queue_shared(client, process_queue_shared)
                 self.delete_client_from_sessions(client)
-                control_activity_process.kill()
+                control_client_activity_process.kill()
                 ManagerApp.logger_client.info(str(client.get(Google_Doc.phone))+": Successfully")
                 sys.exit()
             else:
@@ -119,9 +120,9 @@ class Control:
             self.get_client_order(client, process_queue_shared)
 
     def delete_client_from_process_queue_shared(self, client, process_queue_shared):
-        ManagerApp.logger_client.info("Delete client from process_queue_shared")
         for item in process_queue_shared:
             if client.get(Google_Doc.phone) in item.values():
+                ManagerApp.logger_client.info("Delete client from process_queue_shared")
                 process_queue_shared.remove(item)
 
     def delete_client_from_sessions(self, client):

@@ -87,11 +87,11 @@ class Calendar_Page:
             current_date = time.strptime(self.get_current_date(), "%d.%m.%Y")
             if current_date > user_default_date:
                 print("Найденный месяц больше требуемого")
-                ManagerApp.logger_client.info("Click by next month")
+                ManagerApp.logger_client.info("Click by last month")
                 driver.find_element_by_xpath("//*[@title='Перейти к предыдущему месяцу']").click()
             elif current_date < user_default_date:
                 print("Найденный месяц меньше требуемого")
-                ManagerApp.logger_client.info("Click by previous month")
+                ManagerApp.logger_client.info("Click by next month")
                 try:
                     driver.find_element_by_xpath("//*[@title='Перейти к следующему месяцу']").click()
                 except:
