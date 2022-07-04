@@ -71,7 +71,8 @@ class Control:
         try:
             if self.check_valid(client):
                 ManagerApp.logger_client.info("Started process for " + self.get_name_surname_from_client(client))
-                ManagerApp().set_ip_poxy(ManagerApp.get_json_data()["proxy_url"])
+                #ManagerApp().set_ip_poxy(ManagerApp.get_json_data()["proxy_url"])
+                ManagerApp().set_ip_poxy("socks5://LCjFKu:kVN3UD@186.65.115.27:9980")
                 driver = ManagerApp().get_driver()
                 Control().add_sessions(client)
                 pid = driver.service.process.pid
