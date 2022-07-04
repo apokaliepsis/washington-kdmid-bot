@@ -42,9 +42,9 @@ class Control:
 
     def control_client_process(self, process_queue_shared, client, driver):
         phone= str(client.get(Google_Doc.phone))
+        ManagerApp.logger_client.info(phone + ": Start Control_Client_Process: queue=" + str(process_queue_shared))
         try:
             while True:
-                ManagerApp.logger_client.info(phone+ ": Control_Client_Process: queue="+ str(process_queue_shared))
                 print("Loop Control_Client_Process")
                 for client_process in process_queue_shared:
                     client_process_phone:str = client_process.get("PHONE")

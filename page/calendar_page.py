@@ -158,7 +158,7 @@ class Calendar_Page:
                     ManagerApp.logger_client.info(phone + ": Random time set " + str(time_wait))
                     sleep(time_wait)
                     ManagerApp.logger_client.info(phone + ": Refresh page")
-                    driver.refresh()
+                    #driver.refresh()
                     if len(driver.find_elements_by_id("ctl00_MainContent_Calendar")) == 0:
                         ManagerApp.logger_client.info(phone + ": Calendar not found. Refreshing the page")
 
