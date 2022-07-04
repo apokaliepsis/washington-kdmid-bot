@@ -163,6 +163,7 @@ class Calendar_Page:
                     #driver.quit()
                     #driver = None
                     driver.get("http://washington.kdmid.ru/queue/SPCalendar.aspx")
+                    self.select_specific_slot(client_data, process_queue_shared)
                     #Control().get_client_order(client_data, process_queue_shared)
 
                     if len(driver.find_elements_by_id("ctl00_MainContent_Calendar")) == 0:
