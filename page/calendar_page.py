@@ -157,11 +157,13 @@ class Calendar_Page:
                     time_wait = random.randint(time_refresh_page_wait - 20, time_refresh_page_wait + 20)
                     ManagerApp.logger_client.info(phone + ": Random time set " + str(time_wait))
                     sleep(time_wait)
-                    ManagerApp.logger_client.info(phone + ": Refresh page")
+                    ManagerApp.logger_client.info(phone + ": Restart page")
                     #driver.refresh()
-                    if len(driver.find_elements_by_id("ctl00_MainContent_Calendar")) == 0:
-                        ManagerApp.logger_client.info(phone + ": Calendar not found. Refreshing the page")
+                    ManagerApp().quit_driver()
+                    Control().get_client_order(client_data, process_queue_shared)
 
+                    if len(driver.find_elements_by_id("ctl00_MainContent_Calendar")) == 0:
+                        ManagerApp.logger_client.info(phone + ": Calendar not found. Restart the page")
                         driver.implicitly_wait(ManagerApp.time_implicit_wait)
                         Control().get_client_order(client_data, process_queue_shared)
                     if len(driver.find_elements_by_xpath("//*[contains(text(), ' Почему так случилось?')]")) > 0:
@@ -181,6 +183,7 @@ class Calendar_Page:
                 is_exist_free_slot = len(driver.find_elements_by_xpath(self.table_xpath)) > 0
                 driver.implicitly_wait(ManagerApp.time_implicit_wait)
                 return is_exist_free_slot
+            print("Exit from wait slot loop")
             driver.implicitly_wait(ManagerApp.time_implicit_wait)
         except Exception as e:
             ManagerApp.logger_client.error("Error client waiting: "+str(e))
