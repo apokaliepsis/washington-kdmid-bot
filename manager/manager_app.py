@@ -62,7 +62,7 @@ class ManagerApp:
         chrome_options.add_argument("--no-sandbox")
         chrome_options.add_argument("--disable-setuid-sandbox")
         chrome_options.add_argument("--disable-dev-shm-usage")
-        chrome_options.add_argument("--disable-gpu")
+        #chrome_options.add_argument("--disable-gpu")
         ManagerApp.logger_main.info("Proxy: " + str(self.__options))
         self.__driver = webdriver.Chrome(executable_path=ChromeDriverManager().install(),
                                          chrome_options=chrome_options, seleniumwire_options=self.__options)
