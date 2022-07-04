@@ -69,10 +69,10 @@ class ManagerApp:
         ManagerApp.__options = {
             'proxy': {
                 # 'http': 'http://64.227.14.149:80'
-                'https': ip
-                # 'no_proxy': 'localhost,127.0.0.1'
+                'https': ip,
+                'no_proxy': 'localhost,127.0.0.1'
             },
-            'connection_timeout': 25
+            'connection_timeout': 30
         }
         ManagerApp.logger_main.info("Proxy: "+str(ManagerApp.__options))
 

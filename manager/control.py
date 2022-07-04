@@ -139,9 +139,10 @@ class Control:
 
         Control.__client_data_list = Google_Doc().get_google_doc_data()
         while True:
+
             try:
                 if int(self.get_status_monitoring()) == 1:
-                    self.check_available_site()
+                    #self.check_available_site()
                     if int(self.get_status_monitoring()) == 1 and Control.__client_data_list is not None and len(
                             Control.__client_data_list) > 0:
                         self.start_clients_threads(self.get_client_data())

@@ -119,6 +119,7 @@ class Calendar_Page:
             print(dates)
             is_exist_free_slot = False
             while is_exist_free_slot == False:
+                ManagerApp.logger_client.info(phone_client+": Loop with multidates. Wait free slot")
                 for day in dates:
                     self.set_date_to_calendar(day, client, process_queue_shared)
                     is_exist_free_slot = self.wait_free_slot(client, process_queue_shared, True)
@@ -172,9 +173,9 @@ class Calendar_Page:
                 if len(driver.find_elements_by_xpath(self.table_xpath)) > 0:
                     return True
                 else:
-                    sleep(random.randint(time_refresh_page_wait - 20, time_refresh_page_wait + 20))
                     ManagerApp.logger_client.info(
                         phone + ": No available slots. We wait " + str(time_refresh_page_wait) + " seconds")
+                    sleep(random.randint(time_refresh_page_wait - 20, time_refresh_page_wait + 20))
                     ManagerApp.logger_client.info(phone + ": Refresh page")
                     driver.refresh()
                 is_exist_free_slot = len(driver.find_elements_by_xpath(self.table_xpath)) > 0
