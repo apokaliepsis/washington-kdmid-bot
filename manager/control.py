@@ -139,7 +139,6 @@ class Control:
 
         Control.__client_data_list = Google_Doc().get_google_doc_data()
         while True:
-
             try:
                 if int(self.get_status_monitoring()) == 1:
                     #self.check_available_site()
