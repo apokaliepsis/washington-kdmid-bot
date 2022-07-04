@@ -156,7 +156,7 @@ class Calendar_Page:
                         phone + ": No available slots. We wait " + str(time_refresh_page_wait) + " seconds")
                     time_wait = random.randint(time_refresh_page_wait - 20, time_refresh_page_wait + 20)
                     ManagerApp.logger_client.info(phone + ": Random time set " + str(time_wait))
-                    sleep(time_wait)
+                    #sleep(time_wait)
                     ManagerApp.logger_client.info(phone + ": Restart page")
                     #driver.refresh()
                     driver.quit()
