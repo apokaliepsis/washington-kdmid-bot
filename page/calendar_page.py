@@ -148,7 +148,7 @@ class Calendar_Page:
         try:
             driver = ManagerApp().get_driver()
             phone = str(client_data.get(Google_Doc.phone))
-            driver.implicitly_wait(1)
+            driver.implicitly_wait(5)
             time_refresh_page_wait = int(ManagerApp.get_value_from_config("TIME_REFRESH_PAGE_WAIT"))
             if is_multidates == False:
                 while len(driver.find_elements_by_xpath(self.table_xpath)) == 0:
