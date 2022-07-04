@@ -156,12 +156,13 @@ class Calendar_Page:
                         phone + ": No available slots. We wait " + str(time_refresh_page_wait) + " seconds")
                     time_wait = random.randint(time_refresh_page_wait - 20, time_refresh_page_wait + 20)
                     ManagerApp.logger_client.info(phone + ": Random time set " + str(time_wait))
-                    #sleep(time_wait)
+                    sleep(30)
                     ManagerApp.logger_client.info(phone + ": Restart page")
                     #driver.refresh()
-                    driver.quit()
+                    #driver.quit()
                     #driver = None
-                    Control().get_client_order(client_data, process_queue_shared)
+                    driver.get("http://washington.kdmid.ru/queue/SPCalendar.aspx")
+                    #Control().get_client_order(client_data, process_queue_shared)
 
                     if len(driver.find_elements_by_id("ctl00_MainContent_Calendar")) == 0:
                         ManagerApp.logger_client.info(phone + ": Calendar not found. Restart the page")
