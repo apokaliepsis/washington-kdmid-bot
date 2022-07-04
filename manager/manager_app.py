@@ -72,7 +72,8 @@ class ManagerApp:
                 'https': ip,
                 'no_proxy': 'localhost,127.0.0.1'
             },
-            'connection_timeout': 30
+            'connection_timeout': 30,
+            'connection_keep_alive': True
         }
         ManagerApp.logger_main.info("Proxy: "+str(ManagerApp.__options))
 

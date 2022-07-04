@@ -41,10 +41,11 @@ class Control:
         return client_data
 
     def control_client_process(self, process_queue_shared, client, driver):
-        phone:str = client.get(Google_Doc.phone)
+        phone= str(client.get(Google_Doc.phone))
         try:
             while True:
                 ManagerApp.logger_client.info(phone+ ": Control_Client_Process: queue="+ str(process_queue_shared))
+                print("Loop Control_Client_Process")
                 for client_process in process_queue_shared:
                     client_process_phone:str = client_process.get("PHONE")
                     if client_process_phone == phone and client_process.get("ACTIVE") == 0:
@@ -72,15 +73,13 @@ class Control:
                 ManagerApp.logger_client.info("Started process for " + self.get_name_surname_from_client(client))
                 ManagerApp().set_ip_poxy(ManagerApp.get_json_data()["proxy_url"])
                 driver = ManagerApp().get_driver()
-                self.add_sessions(client)
+                Control().add_sessions(client)
                 pid = driver.service.process.pid
                 print("PID=",pid)
-                self.delete_client_from_process_queue_shared(client, process_queue_shared)
+                Control().delete_client_from_process_queue_shared(client, process_queue_shared)
                 process_queue_shared.append({"PHONE": client.get(Google_Doc.phone), "ACTIVE": 1, "PID":pid})
 
-                control_client_activity_process = Process(
-                    target=self.control_client_process,
-                    name="Control_Client_Process_" + str(client.get(Google_Doc.phone)), args=(process_queue_shared, client, driver))
+                control_client_activity_process = Process(target=Control().control_client_process, name="Control_Client_Process_" + str(client.get(Google_Doc.phone)), args=(process_queue_shared, client, driver))
                 control_client_activity_process.start()
 
                 ###ManagerApp().set_ip_poxy("socks5://4sdBGU:E3F6K7@181.177.86.241:9526")
