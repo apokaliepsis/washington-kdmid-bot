@@ -159,7 +159,8 @@ class Calendar_Page:
                     sleep(time_wait)
                     ManagerApp.logger_client.info(phone + ": Restart page")
                     #driver.refresh()
-                    ManagerApp().quit_driver()
+                    driver.quit()
+                    #driver = None
                     Control().get_client_order(client_data, process_queue_shared)
 
                     if len(driver.find_elements_by_id("ctl00_MainContent_Calendar")) == 0:
