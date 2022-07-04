@@ -8,6 +8,7 @@ from loguru import logger
 import sys
 import pickle
 from seleniumwire import webdriver
+from fake_useragent import UserAgent
 
 selenium_logger = logging.getLogger('seleniumwire')
 selenium_logger.setLevel(logging.ERROR)
@@ -27,6 +28,9 @@ class ManagerApp:
     time_implicit_wait = 25
 
     def startDriver(self):
+
+        ua = UserAgent()
+        userAgent = ua.random
         chrome_options = Options()
         settings = {
             "recentDestinations": [{
@@ -48,15 +52,18 @@ class ManagerApp:
         chrome_options.add_argument("--start-maximized")
         chrome_options.add_argument("--window-size=1920,1080")
         chrome_options.add_argument(
-            "user-agent=Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:84.0) Gecko/20100101 Firefox/84.0")
+            f"user-agent={userAgent}")
         # chrome_options.add_argument("--headless")
         #chrome_options.add_argument("--proxy-server=socks5://4sdBGU:E3F6K7@181.177.86.241:9526")
         # chrome_options.add_argument("--disable-extensions")
         # chrome_options.add_argument("--profile-directory=Default")
         # chrome_options.add_argument("--disable-plugins-discovery")
         chrome_options.add_argument("--disable-blink-features=AutomationControlled")
+
         chrome_options.add_argument("--no-sandbox")
+        chrome_options.add_argument("--disable-setuid-sandbox")
         chrome_options.add_argument("--disable-dev-shm-usage")
+        chrome_options.add_argument("--disable-gpu")
         ManagerApp.logger_main.info("Proxy: " + str(self.__options))
         self.__driver = webdriver.Chrome(executable_path=ChromeDriverManager().install(),
                                          chrome_options=chrome_options, seleniumwire_options=self.__options)
