@@ -105,14 +105,6 @@ class ManagerApp:
             ManagerApp.logger = logger
             ManagerApp.logger.add("main.log", format="{time:YYYY-MM-DD HH:mm:ss.SSS} {name} {message}",
                                   level="DEBUG", rotation="1 MB")
-            # ManagerApp.log.setLevel(logging.DEBUG)
-            # formatter = logging.Formatter('[%(asctime)s] %(filename)s:%(lineno)d %(levelname)-8s %(message)s')
-            # fh = logging.FileHandler(file, encoding=encoding)
-            # fh.setFormatter(formatter)
-            # ManagerApp.log.addHandler(fh)
-            # sh = logging.StreamHandler(stream=sys.stdout)
-            # sh.setFormatter(formatter)
-            # ManagerApp.log.addHandler(sh)
         return ManagerApp.logger
 
     @staticmethod
