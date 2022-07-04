@@ -87,7 +87,7 @@ class ManagerApp:
         for cookie in cookies:
             self.__driver.add_cookie(cookie)
 
-    def get_driver(self):
+    def get_driver(self) -> webdriver:
         if ManagerApp.__driver is None:
             ManagerApp.__driver = self.startDriver()
         return ManagerApp.__driver
