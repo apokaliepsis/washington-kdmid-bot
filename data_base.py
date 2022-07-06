@@ -3,7 +3,7 @@ import sqlite3
 
 class Data_Base:
     __connection = None
-    db_path = "consulWashington.db"
+    db_path = "/home/consulWashington.db"
 
     @staticmethod
     def execute_select_query(query):
