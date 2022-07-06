@@ -52,7 +52,7 @@ class Control:
                         ManagerApp.logger_client.info("Close process for " + str(phone))
                         # driver.close()
                         # Google_Doc.delete_row_from_doc(phone)
-                        Data_Base.exec_query("delete from sessions where phone='%s'" % phone)
+                        Data_Base.execute_process("delete from sessions where phone='%s'" % phone)
                         driver.quit()
                         ManagerApp.logger_client.info("Quit driver for " + str(phone))
                         # process_queue.remove(client_process)
@@ -128,15 +128,19 @@ class Control:
     def delete_client_from_sessions(self, client):
         ManagerApp.logger_main.info("Delete from sessions client: " + str(client))
         fio = str(client.get(Google_Doc.name)) + " " + str(client.get(Google_Doc.surname))
-        Data_Base.exec_query("delete from sessions where fio='%s'" % fio)
+        Data_Base.execute_process("delete from sessions where fio='%s'" % fio)
 
     @logger.catch()
     def run_main(self):
         self.execute_bash_command("pkill -9 -f chromedriver")
 
+        Control().delete_sessions()
+        Control().delete_temp_files()
+        Control().enable_monitoring()
+        Control().create_dir_temp()
+
         bot_process = Process(target=start_bot, name="Bot", args=(Control.process_queue_shared,))
         bot_process.start()
-
         Control.__client_data_list = Google_Doc().get_google_doc_data()
         while True:
             try:
@@ -158,10 +162,10 @@ class Control:
         return Data_Base.get_data_by_query("select* from settings")[0].get("MONITORING_STATUS")
     def enable_monitoring(self):
         ManagerApp.logger_main.info("Enable monitoring")
-        return Data_Base.exec_query("update settings set monitoring_status=1")
+        return Data_Base.execute_process("update settings set monitoring_status=1")
     def disable_monitoring(self):
         ManagerApp.logger_main.info("Disable monitoring")
-        return Data_Base.exec_query("update settings set monitoring_status=0")
+        return Data_Base.execute_process("update settings set monitoring_status=0")
     def control_sessions_queue(self):
         try:
             ManagerApp.logger_main.info("Running process: "+str(multiprocessing.active_children()))
@@ -194,8 +198,8 @@ class Control:
 
     def delete_sessions(self):
         ManagerApp.logger_main.info("Delete sessions")
-        Data_Base.exec_query("delete from sessions")
-        print("select* from sessions=",Data_Base.exec_query("select* from sessions"))
+        Data_Base.execute_process("delete from sessions")
+        #print("select* from sessions=", Data_Base.execute_select_query("select* from sessions"))
 
     def start_clients_threads(self, client_data_list):
         ManagerApp.logger_main.info("Start clients threads...")
@@ -215,8 +219,8 @@ class Control:
         phone = client.get(Google_Doc.phone)
         active = 1
         if len(Data_Base.get_data_by_query("select* from sessions where phone='%s'" % phone))>0:
-            Data_Base.exec_query("delete from sessions where phone='%s'" % phone)
-        Data_Base.exec_query(
+            Data_Base.execute_process("delete from sessions where phone='%s'" % phone)
+        Data_Base.execute_process(
             "insert into sessions (fio, order_date, phone, active) values ('%s', '%s', '%s', '%s')" % (
                 fio, order_date, phone, active))
 

@@ -65,3 +65,12 @@ class Google_Doc:
                 break
             count += 1
 
+    def get_googledoc_data_gspread(self):
+        scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive',
+                 'https://www.googleapis.com/auth/spreadsheets']
+        credentials = ServiceAccountCredentials.from_json_keyfile_name(Google_Doc.auth_file, scope)
+        gc = gspread.authorize(credentials)
+        worksheet = gc.open_by_url(ManagerApp.get_json_data()["document_url"]).sheet1
+        client_data = worksheet.get_all_records()
+        return client_data
+

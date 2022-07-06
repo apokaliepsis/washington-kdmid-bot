@@ -114,7 +114,7 @@ async def stop_process(callback):
                                         text="Остановка процессов...")
         for index, client_process in enumerate(process_queue_shared):
             ManagerApp.logger_main.info("Set ACTIVE=0 for all")
-            Data_Base.exec_query("update settings set monitoring_status=0")
+            Data_Base.execute_process("update settings set monitoring_status=0")
             print("BOT: process_queue_shared1=", process_queue_shared)
             client_process["ACTIVE"] = 0
             process_queue_shared[index] = client_process
@@ -122,7 +122,7 @@ async def stop_process(callback):
             print("BOT: process_queue_shared2=", process_queue_shared)
             sleep(5)
         for index in range(10):
-            if len(Data_Base.exec_query("select* from sessions")) > 0:
+            if len(Data_Base.execute_select_query("select* from sessions")) > 0:
                 sleep(5)
         Control().execute_bash_command("pkill -9 -f chromedriver")
 
@@ -146,8 +146,8 @@ async def message_handler(message: types.Message):
         language_code = message.from_user.language_code
         action_id = "0"
 
-        if len(Data_Base.exec_query("select* from configuration where chatid=%s" % chatid))==0:
-            Data_Base().exec_query(
+        if len(Data_Base.execute_select_query("select* from configuration where chatid=%s" % chatid))==0:
+            Data_Base.execute_process(
                 "insert into configuration (chatid, date, username, fio, language_code, action_id) values ('%s', '%s', '%s', '%s', '%s', '%s')" % (
                     chatid, date, username, fio, language_code, action_id))
     elif message.text == Menu.clients_button:
@@ -201,10 +201,7 @@ def send_message(chat_id, text):
 def start_bot(process_queue):
     from manager.control import Control
     ManagerApp.logger_main.info("Start bot")
-    Control().delete_sessions()
-    Control().delete_temp_files()
-    Control().enable_monitoring()
-    Control().create_dir_temp()
+
     starter_bot.process_queue_shared = process_queue
     executor.start_polling(dp, skip_updates=True, on_startup=on_startup)
 def send_file(path_file, chat_id):

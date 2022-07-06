@@ -1,45 +1,54 @@
-import jaydebeapi
 from manager.manager_app import ManagerApp
-
+import sqlite3
 
 class Data_Base:
+    __connection = None
+    db_path = "consulWashington.db"
+
     @staticmethod
-    def exec_query(query):
+    def execute_select_query(query):
         print(query)
-        connection = jaydebeapi.connect(
-            "org.h2.Driver",
-            "jdbc:h2:tcp://localhost/~/consulWashingtonH2",
-            ["admin", "123456"],
-            "h2-2.0.202.jar")
-        cursor = connection.cursor()
         data = []
+        cursor = None
         try:
+            connection = Data_Base().get_connection()
+            cursor = connection.cursor()
             cursor.execute(query)
             data = cursor.fetchall()
-            print(data)
-
         except Exception as e:
-            print("Data_Base except: ",e)
             ManagerApp.logger_main.warning(e)
         finally:
             cursor.close()
-            connection.close()
         return data
 
 
+    def get_connection(self):
+        if Data_Base.__connection == None:
+            Data_Base.__connection = sqlite3.connect(Data_Base.db_path)
+            return Data_Base.__connection
+        else: return Data_Base.__connection
+
     @staticmethod
-    def get_cursor():
-        connection = jaydebeapi.connect(
-            "org.h2.Driver",
-            "jdbc:h2:tcp://localhost/~/consulWashingtonH2",
-            ["admin", "123456"],
-            "h2-2.0.202.jar")
-        cursor = connection.cursor()
-        return connection, cursor
+    def execute_process(query):
+        print(query)
+        cursor = None
+        try:
+            connection = Data_Base().get_connection()
+            cursor = connection.cursor()
+            cursor.execute(query)
+            connection.commit()
+        except Exception as e:
+            ManagerApp.logger_main.warning(e)
+        finally:
+            cursor.close()
+
+
 
     @staticmethod
     def get_data_by_query(query) -> []:
-        connection, cursor = Data_Base.get_cursor()
+        print(query)
+        connection = Data_Base().get_connection()
+        cursor = connection.cursor()
         result = []
         try:
             cursor.execute(query)
@@ -60,5 +69,5 @@ class Data_Base:
             ManagerApp.logger_main.warning(e)
         finally:
             cursor.close()
-            connection.close()
+
         return result

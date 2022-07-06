@@ -25,7 +25,7 @@ class Authorization:
         # valueRandom = "".join([random.choice(string.ascii_letters) for i in xrange(10)])
         # email = "".join([random.choice(string.ascii_letters) for i in xrange(5)]) + str("@") \
         #         + "".join([random.choice(string.ascii_letters) for i in xrange(5)]) + str(".com")
-        ManagerApp.logger_main.info(str(client.get(Google_Doc.phone))+": Filling in fields")
+        ManagerApp.logger_client.info(str(client.get(Google_Doc.phone))+": Filling in fields")
         driver.find_element_by_css_selector("#ctl00_MainContent_txtFam").send_keys(client.get(Google_Doc.surname))
         driver.find_element_by_css_selector("#ctl00_MainContent_txtIm").send_keys(client.get(Google_Doc.name))
         driver.find_element_by_css_selector("#ctl00_MainContent_txtOt").send_keys(client.get(Google_Doc.middle_name))

@@ -7,7 +7,7 @@ import urllib.request
 from PIL import Image, ImageEnhance
 from cffi.backend_ctypes import xrange
 from easyocr import easyocr
-from loguru import logger
+
 
 from manager.manager_app import ManagerApp
 
