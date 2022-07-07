@@ -46,7 +46,7 @@ async def callback_handler(callback: types.CallbackQuery):
                     no = InlineKeyboardButton("Назад", callback_data="<-Назад")
                     keyboard = InlineKeyboardMarkup(row_width=1).add(yes)
 
-                    client_info = str(count) + ") " + str(item.get("FIO")) + "\nДата записи: " + str(
+                    client_info = str(count) + ") " + str(item.get("FIO"))+" | Телефон: "+str(item.get("PHONE")) + " | Дата для записи: " + str(
                         item.get("ORDER_DATE"))
                     print("text=" + client_info)
                     if count == len(clients):
@@ -72,6 +72,10 @@ async def callback_handler(callback: types.CallbackQuery):
         else: await bot_telegram.send_message(chat_id=callback.message.chat.id, text="Нет запущенных процессов по клиентам")
     elif callback.data == "/stopall":
         await stop_process(callback)
+
+    elif callback.data == "/enablemonitoring":
+        Control().enable_monitoring()
+        await bot_telegram.send_message(chat_id=callback.message.chat.id, text="Мониторинг включен")
 
     elif callback.data == "Назад":
         clients_button = InlineKeyboardButton(Menu.clients_button, callback_data=Menu.clients_button)
@@ -112,19 +116,20 @@ async def stop_process(callback):
     try:
         await bot_telegram.send_message(chat_id=callback.message.chat.id,
                                         text="Остановка процессов...")
-        for index, client_process in enumerate(process_queue_shared):
-            ManagerApp.logger_main.info("Set ACTIVE=0 for all")
-            Data_Base.execute_process("update settings set monitoring_status=0")
-            print("BOT: process_queue_shared1=", process_queue_shared)
-            client_process["ACTIVE"] = 0
-            process_queue_shared[index] = client_process
-            print("BOT: client_process=", client_process)
-            print("BOT: process_queue_shared2=", process_queue_shared)
-            sleep(5)
-        for index in range(10):
-            if len(Data_Base.execute_select_query("select* from sessions")) > 0:
-                sleep(5)
-        Control().execute_bash_command("pkill -9 -f chromedriver")
+        # for index, client_process in enumerate(process_queue_shared):
+        #     ManagerApp.logger_main.info("Set ACTIVE=0 for all")
+        #     Data_Base.execute_process("update settings set monitoring_status=0")
+        #     print("BOT: process_queue_shared1=", process_queue_shared)
+        #     client_process["ACTIVE"] = 0
+        #     process_queue_shared[index] = client_process
+        #     print("BOT: client_process=", client_process)
+        #     print("BOT: process_queue_shared2=", process_queue_shared)
+        #     sleep(5)
+        # for index in range(10):
+        #     if len(Data_Base.execute_select_query("select* from sessions")) > 0:
+        #         sleep(5)
+        # Control().execute_bash_command("pkill -9 -f chromedriver")
+        Control().stop_all_process()
 
         await bot_telegram.send_message(chat_id=callback.message.chat.id,
                                         text="Процессы мониторинга остановлены")

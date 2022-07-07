@@ -202,7 +202,11 @@ class Control:
             print(p.name)
             if p.name.__contains__(Control.thread):
                 p.kill()
+        Control.process_queue_shared = multiprocessing.Manager().list()
+        ManagerApp.logger_main.info(
+            "Process_queue_shared={}".format(Control.process_queue_shared))
         self.delete_sessions()
+        self.disable_monitoring()
         self.execute_bash_command("pkill -9 -f chromedriver")
         self.execute_bash_command("pkill -9 -f chrome")
         ManagerApp.logger_main.info("All client processes are killed")
@@ -211,11 +215,11 @@ class Control:
         ManagerApp.logger_main.info("Delete sessions")
         Data_Base.execute_process("delete from sessions")
         # print("select* from sessions=", Data_Base.execute_select_query("select* from sessions"))
-    @profile
+
     def start_clients_threads(self, client_data_list):
         ManagerApp.logger_main.info("Start clients threads...")
         for client in client_data_list:
-            if self.check_exist_process(client.get(Google_Doc.phone)) == False:
+            if self.check_exist_process(client.get(Google_Doc.phone)) == False and int(self.get_status_monitoring()) == 1:
                 name_process = "ClientThread_{}".format(client.get(Google_Doc.phone))
                 ManagerApp.logger_main.info("Started process for {}".format(self.get_name_surname_from_client(client)))
                 p1 = Process(target=self.get_client_order, name=name_process,
@@ -382,11 +386,35 @@ class Control:
         driver = ManagerApp().get_driver()
         phone = str(client.get(Google_Doc.phone))
         ManagerApp.logger_client.info(phone + ": Save current page as pdf")
-        ManagerApp.logger_client.info(driver.find_element_by_css_selector("#Label_Message").text)
+        #ManagerApp.logger_client.info(driver.find_element_by_css_selector("#Label_Message").text)
         name_title = str(client.get(Google_Doc.name)) + "_" + str(client.get(Google_Doc.surname))
         driver.execute_script('document.title = "%s"' % name_title)
         driver.execute_script('window.print();')
         document_pdf = os.path.abspath(ManagerApp.get_value_from_config("ORDER_DOCUMENT_PATH") + name_title + ".pdf")
+        ManagerApp.logger_client.info("{}: document_pdf={}".format(phone, document_pdf))
+        for i in range(10):
+            if os.path.exists(document_pdf):
+                ManagerApp.logger_client.info("Document pdf created: {}".format(document_pdf))
+                break
+            else:
+                sleep(3)
+        if os.path.exists(document_pdf) == False:
+            ManagerApp.logger_client.info("{}: Error! Document pdf don't created! {}".format(phone, document_pdf))
+            return None
+        return document_pdf
+    def save_current_page_as_pdf2(self,client):
+        driver = ManagerApp().get_driver()
+        phone = str(client.get(Google_Doc.phone))
+        ManagerApp.logger_client.info(phone + ": Save current page as pdf")
+        #ManagerApp.logger_client.info(driver.find_element_by_css_selector("#Label_Message").text)
+        name_title = str(client.get(Google_Doc.name)) + "_" + str(client.get(Google_Doc.surname))
+
+        document_html = os.path.abspath(ManagerApp.get_value_from_config("ORDER_DOCUMENT_PATH") + name_title + ".html")
+        with open(document_html, 'w') as f:
+            f.write(driver.page_source)
+        document_pdf = os.path.abspath(ManagerApp.get_value_from_config("ORDER_DOCUMENT_PATH") + name_title + ".pdf")
+        self.execute_bash_command("google-chrome --headless --disable-gpu --print-to-pdf={} {}".format(document_pdf, document_html))
+        #os.remove(document_html)
         ManagerApp.logger_client.info("{}: document_pdf={}".format(phone, document_pdf))
         for i in range(10):
             if os.path.exists(document_pdf):
@@ -398,6 +426,8 @@ class Control:
             ManagerApp.logger_client.info("{}: Error! Document pdf don't created! {}".format(phone, document_pdf))
             return None
         return document_pdf
+
+
 
     def execute_bash_command(self, command):
         ManagerApp.logger_main.info("Execute bash-command: {}".format(command))
