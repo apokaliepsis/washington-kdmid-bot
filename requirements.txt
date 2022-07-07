@@ -48,6 +48,7 @@ JPype1==1.4.0
 kaitaistruct==0.9
 loguru==0.6.0
 lxml==4.9.0
+memory-profiler==0.60.0
 meteo-downloader==1.0
 multidict==6.0.2
 networkx==2.6.3
@@ -61,6 +62,7 @@ parse==1.19.0
 peewee==3.15.0
 Pillow==9.1.1
 protobuf==4.21.2
+psutil==5.9.1
 pyasn1==0.4.8
 pyasn1-modules==0.2.8
 pycparser==2.21
