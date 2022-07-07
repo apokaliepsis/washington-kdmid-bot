@@ -4,10 +4,7 @@ from manager.manager_app import ManagerApp
 
 class DB_Sqlite:
     __connection = None
-    # with jaydebeapi.connect("org.hsqldb.jdbcDriver","jdbc:hsqldb:mem:.",["SA", ""],"/path/to/hsqldb.jar", ) as conn:
-    #     with conn.cursor() as curs:
-    #          curs.execute("select count(*) from CUSTOMER")
-    #          curs.fetchall()
+
     @staticmethod
     def execute_select_query(query):
         print(query)
