@@ -3,6 +3,7 @@ import sys
 
 import pygsheets
 import gspread
+
 from oauth2client.service_account import ServiceAccountCredentials
 from manager.manager_app import ManagerApp
 
@@ -23,7 +24,6 @@ class Google_Doc:
         ManagerApp.logger_main.info("Count clients: {}".format(len(client_data)))
         for i in client_data:
             print(i)
-        wk1.clear()
 
         return client_data
 
