@@ -1,4 +1,7 @@
 import random
+import sys
+
+from memory_profiler import profile
 
 from manager.control import Control
 from network_file.google_doc import Google_Doc
@@ -151,6 +154,7 @@ class Calendar_Page:
             driver.implicitly_wait(5)
             time_refresh_page_wait = int(ManagerApp.get_value_from_config("TIME_REFRESH_PAGE_WAIT"))
             if is_multidates == False:
+
                 while len(driver.find_elements_by_xpath(self.table_xpath)) == 0:
                     ManagerApp.logger_client.info(
                         phone + ": No available slots. We wait {} seconds".format(time_refresh_page_wait))

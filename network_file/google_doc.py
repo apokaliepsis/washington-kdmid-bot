@@ -2,6 +2,7 @@ import sys
 
 import pygsheets
 import gspread
+from memory_profiler import profile
 from oauth2client.service_account import ServiceAccountCredentials
 from manager.manager_app import ManagerApp
 
@@ -16,10 +17,11 @@ class Google_Doc:
     birth_date = "Дата рождения"
     order_date = "Дата записи"
 
+    @profile
     def get_google_doc_data(self):
         wk1 = self.get_sheet()
         client_data = wk1.get_all_records()
-        print("Count clients: "+str(len(client_data)))
+        ManagerApp.logger_main.info("Count clients: {}".format(len(client_data)))
         for i in client_data:
             print(i)
         return client_data

@@ -2,7 +2,7 @@ from manager.manager_app import ManagerApp
 import sqlite3
 
 class Data_Base:
-    __connection = None
+    connection = None
     db_path = "/home/consulWashington.db"
 
     @staticmethod
@@ -23,10 +23,10 @@ class Data_Base:
 
 
     def get_connection(self):
-        if Data_Base.__connection == None:
-            Data_Base.__connection = sqlite3.connect(Data_Base.db_path)
-            return Data_Base.__connection
-        else: return Data_Base.__connection
+        if Data_Base.connection == None:
+            Data_Base.connection = sqlite3.connect(Data_Base.db_path)
+            return Data_Base.connection
+        else: return Data_Base.connection
 
     @staticmethod
     def execute_process(query):
