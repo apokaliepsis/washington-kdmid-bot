@@ -3,7 +3,6 @@ import sys
 
 import pygsheets
 import gspread
-from memory_profiler import profile
 from oauth2client.service_account import ServiceAccountCredentials
 from manager.manager_app import ManagerApp
 
