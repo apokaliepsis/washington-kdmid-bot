@@ -1,3 +1,4 @@
+import gc
 import sys
 
 import pygsheets
@@ -17,13 +18,14 @@ class Google_Doc:
     birth_date = "Дата рождения"
     order_date = "Дата записи"
 
-    @profile
     def get_google_doc_data(self):
-        wk1 = self.get_sheet()
+        wk1 = Google_Doc().get_sheet()
         client_data = wk1.get_all_records()
         ManagerApp.logger_main.info("Count clients: {}".format(len(client_data)))
         for i in client_data:
             print(i)
+        wk1.clear()
+
         return client_data
 
     def delete_row_from_doc(self, value)-> []:
@@ -45,19 +47,16 @@ class Google_Doc:
             ManagerApp.logger_client.warning(e)
 
     def get_sheet(self):
-        gc = pygsheets.authorize(
-            service_account_file=Google_Doc.auth_file)  # This will create a link to authorize
-        sh = gc.open_by_url(ManagerApp.get_json_data()["document_url"])
-        wk1 = sh.sheet1
-        return wk1
-
-    def delete_row_gspread(self, value):
-        ManagerApp.logger_client.info("Delete from GoogleDoc: {}".format(value))
         scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive',
                  'https://www.googleapis.com/auth/spreadsheets']
         credentials = ServiceAccountCredentials.from_json_keyfile_name(Google_Doc.auth_file, scope)
         gc = gspread.authorize(credentials)
         worksheet = gc.open_by_url(ManagerApp.get_json_data()["document_url"]).sheet1
+        return worksheet
+
+    def delete_row_gspread(self, value):
+        ManagerApp.logger_client.info("Delete from GoogleDoc: {}".format(value))
+        worksheet = self.get_sheet()
         client_data = worksheet.get_all_records()
         count = 2
         for i in client_data:
