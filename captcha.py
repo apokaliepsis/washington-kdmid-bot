@@ -13,7 +13,7 @@ from manager.manager_app import ManagerApp
 
 
 class Captcha:
-    reader = easyocr.Reader(["en"], gpu=False)
+
 
     def recognize_captcha(self):
         try:
@@ -34,8 +34,8 @@ class Captcha:
             factor = 2.4
             im_output = enhancer.enhance(factor)
             im_output.save(file_path)
-
-            result = Captcha.reader.readtext(file_path, detail=0, allowlist='0123456789')
+            reader = easyocr.Reader(["en"], gpu=False)
+            result = reader.readtext(file_path, detail=0, allowlist='0123456789')
             print("result=", result)
             self.remove_file(file_path)
             if result == []:
@@ -54,7 +54,7 @@ class Captcha:
             print(e)
 
     def remove_file(self, file_path):
-        ManagerApp.logger_main.info("Remove captcha file: "+file_path)
+        ManagerApp.logger_main.info("Remove captcha file: {}".format(file_path))
         os.remove(file_path)
 
     def save_image(self, url):

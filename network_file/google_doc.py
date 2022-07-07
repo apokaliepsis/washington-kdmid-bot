@@ -26,12 +26,12 @@ class Google_Doc:
 
     def delete_row_from_doc(self, value)-> []:
         ##value:str
-        ManagerApp.logger_client.info("Delete from GoogleDoc: "+str(value))
+        ManagerApp.logger_client.info("Delete from GoogleDoc: {}".format(value))
         try:
             sheet:pygsheets.worksheet.Worksheet = self.get_sheet()
-            ManagerApp.logger_client.info("get_sheet(): "+str(sheet))
+            ManagerApp.logger_client.info("get_sheet(): {}".format(sheet))
             client_data = sheet.get_all_records()
-            ManagerApp.logger_client.info("sheet.get_all_records()="+str(client_data))
+            ManagerApp.logger_client.info("sheet.get_all_records()={}".format(client_data))
             count = 2
             for i in client_data:
                 row = i.values()
@@ -50,7 +50,7 @@ class Google_Doc:
         return wk1
 
     def delete_row_gspread(self, value):
-        ManagerApp.logger_client.info("Delete from GoogleDoc: " + str(value))
+        ManagerApp.logger_client.info("Delete from GoogleDoc: {}".format(value))
         scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive',
                  'https://www.googleapis.com/auth/spreadsheets']
         credentials = ServiceAccountCredentials.from_json_keyfile_name(Google_Doc.auth_file, scope)

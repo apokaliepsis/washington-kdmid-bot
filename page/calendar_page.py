@@ -119,7 +119,7 @@ class Calendar_Page:
             print(dates)
             is_exist_free_slot = False
             while is_exist_free_slot == False:
-                ManagerApp.logger_client.info(phone_client+": Loop with multidates. Wait free slot")
+                ManagerApp.logger_client.info("{}: Loop with multidates. Wait free slot".format(phone_client))
                 for day in dates:
                     self.set_date_to_calendar(day, client, process_queue_shared)
                     is_exist_free_slot = self.wait_free_slot(client, process_queue_shared, True)
@@ -153,14 +153,14 @@ class Calendar_Page:
             if is_multidates == False:
                 while len(driver.find_elements_by_xpath(self.table_xpath)) == 0:
                     ManagerApp.logger_client.info(
-                        phone + ": No available slots. We wait " + str(time_refresh_page_wait) + " seconds")
+                        phone + ": No available slots. We wait {} seconds".format(time_refresh_page_wait))
                     time_wait = random.randint(time_refresh_page_wait - 20, time_refresh_page_wait + 20)
                     sleep(time_wait)
-                    ManagerApp.logger_client.info(phone + ": Restart page")
+                    ManagerApp.logger_client.info("{}: Restart page".format(phone))
                     driver.execute_script("window.location.reload()")
 
                     if len(driver.find_elements_by_id("ctl00_MainContent_Calendar")) == 0:
-                        ManagerApp.logger_client.info(phone + ": Calendar not found. Restart the page")
+                        ManagerApp.logger_client.info("{}: Calendar not found. Restart the page".format(phone))
                         driver.implicitly_wait(ManagerApp.time_implicit_wait)
                         Control().get_client_order(client_data, process_queue_shared)
                     if len(driver.find_elements_by_xpath("//*[contains(text(), ' Почему так случилось?')]")) > 0:
@@ -173,9 +173,9 @@ class Calendar_Page:
                     return True
                 else:
                     ManagerApp.logger_client.info(
-                        phone + ": No available slots. We wait " + str(time_refresh_page_wait) + " seconds")
+                        phone + ": No available slots. We wait {} seconds".format(time_refresh_page_wait))
                     sleep(random.randint(time_refresh_page_wait - 20, time_refresh_page_wait + 20))
-                    ManagerApp.logger_client.info(phone + ": Refresh page")
+                    ManagerApp.logger_client.info("{}: Refresh page".format(phone))
                     driver.refresh()
                 is_exist_free_slot = len(driver.find_elements_by_xpath(self.table_xpath)) > 0
                 driver.implicitly_wait(ManagerApp.time_implicit_wait)
@@ -183,7 +183,7 @@ class Calendar_Page:
             print("Exit from wait slot loop")
             driver.implicitly_wait(ManagerApp.time_implicit_wait)
         except Exception as e:
-            ManagerApp.logger_client.error("Error client waiting: "+str(e))
+            ManagerApp.logger_client.error("Error client waiting: {}".format(e))
         ManagerApp.logger_client.info("Exit from loop waiting")
 
     def click_by_make_order(self):
@@ -192,7 +192,6 @@ class Calendar_Page:
         driver.find_element_by_name("ctl00$MainContent$Button1").click()
 
     def click_by_print(self):
-
         ManagerApp.logger_client.info("Save order document as pdf")
         driver = ManagerApp().get_driver()
 

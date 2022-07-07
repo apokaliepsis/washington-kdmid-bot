@@ -90,7 +90,7 @@ async def callback_handler(callback: types.CallbackQuery):
             phone_client = callback.data.replace("Stop_", "")
             for index, client_process in enumerate(process_queue_shared):
                 if str(client_process.get("PHONE")) == str(phone_client):
-                    ManagerApp.logger_main.info("Set ACTIVE=0 for " + str(phone_client))
+                    ManagerApp.logger_main.info("Set ACTIVE=0 for {}".format(phone_client))
                     print("BOT: process_queue_shared1=", process_queue_shared)
                     client_process["ACTIVE"] = 0
                     process_queue_shared[index] = client_process

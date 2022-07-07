@@ -36,14 +36,14 @@ class Authorization:
 
         # captcha_error = True
         while True:
-            ManagerApp.logger_client.info(str(client.get(Google_Doc.phone))+": Begin recognize_captcha")
-            #captcha_code = Captcha().recognize_captcha()
-            captcha_code:str
-            with concurrent.futures.ThreadPoolExecutor() as executor:
-                future = executor.submit(Captcha().recognize_captcha)
-                captcha_code = future.result()
-                future.done()
-            ManagerApp.logger_client.info(str(client.get(Google_Doc.phone))+": captcha_code="+ str(captcha_code))
+            ManagerApp.logger_client.info("{}: Begin recognize_captcha".format(client.get(Google_Doc.phone)))
+            captcha_code = Captcha().recognize_captcha()
+            #captcha_code:str
+            # with concurrent.futures.ThreadPoolExecutor() as executor:
+            #     future = executor.submit(Captcha().recognize_captcha)
+            #     captcha_code = future.result()
+            #     future.done()
+            ManagerApp.logger_client.info("{}: captcha_code={}".format(client.get(Google_Doc.phone),captcha_code))
             captcha_field = driver.find_element_by_css_selector("#ctl00_MainContent_txtCode")
             captcha_field.clear()
 
@@ -53,10 +53,10 @@ class Authorization:
             driver.implicitly_wait(3)
             if len(driver.find_elements_by_xpath("//*[@class='reason_enable']//*[text()='Загранпаспорт']"))>0:
                 break
-            ManagerApp.logger_client.info(str(client.get(Google_Doc.phone))+": Captcha was entered incorrectly")
+            ManagerApp.logger_client.info("{}: Captcha was entered incorrectly".format(client.get(Google_Doc.phone)))
             #driver.refresh()
         driver.implicitly_wait(ManagerApp.time_implicit_wait)
-        ManagerApp.logger_client.info(str(client.get(Google_Doc.phone))+": Captcha passed")
+        ManagerApp.logger_client.info("{}: Captcha passed".format(client.get(Google_Doc.phone)))
 
     def set_birth_date(self, birth_date):
         from manager.manager_app import ManagerApp

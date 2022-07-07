@@ -36,32 +36,32 @@ class Control:
 
     def get_client_data(self):
         client_data:[] = Google_Doc().get_google_doc_data()
-        ManagerApp.logger_main.info("Client data: " + str(client_data))
+        ManagerApp.logger_main.info("Client data: {}".format(client_data))
 
         return client_data
 
     def control_client_process(self, process_queue_shared, client, driver):
         phone= str(client.get(Google_Doc.phone))
-        ManagerApp.logger_client.info(phone + ": Start Control_Client_Process: queue=" + str(process_queue_shared))
+        ManagerApp.logger_client.info("{}: Start Control_Client_Process: queue={}".format(phone,process_queue_shared))
         try:
             while True:
                 print("Loop Control_Client_Process")
                 for client_process in process_queue_shared:
                     client_process_phone:str = client_process.get("PHONE")
                     if client_process_phone == phone and client_process.get("ACTIVE") == 0:
-                        ManagerApp.logger_client.info("Close process for " + str(phone))
+                        ManagerApp.logger_client.info("Close process for {}".format(phone))
                         # driver.close()
                         # Google_Doc.delete_row_from_doc(phone)
                         Data_Base.execute_process("delete from sessions where phone='%s'" % phone)
                         driver.quit()
-                        ManagerApp.logger_client.info("Quit driver for " + str(phone))
+                        ManagerApp.logger_client.info("Quit driver for {}".format(phone))
                         # process_queue.remove(client_process)
                         #Control.execute_bash_command()
                         _thread.interrupt_main()
                 sleep(5)
         except Exception as e:
-            ManagerApp.logger_client.warning(phone+ ": Error control_client_process!")
-            ManagerApp.logger_client.warning(str(phone)+": "+str(e))
+            ManagerApp.logger_client.warning("{}: Error control_client_process!".format(phone))
+            ManagerApp.logger_client.warning("{}: {}".format(phone,e))
 
     def get_name_surname_from_client(self, client):
         return str(client.get(Google_Doc.name) + " " + client.get(Google_Doc.surname))
@@ -70,9 +70,9 @@ class Control:
         from page.calendar_page import Calendar_Page
         try:
             if self.check_valid(client):
-                ManagerApp.logger_client.info("Started process for " + self.get_name_surname_from_client(client))
-                #ManagerApp().set_ip_poxy(ManagerApp.get_json_data()["proxy_url"])
-                ManagerApp().set_ip_poxy("socks5://LCjFKu:kVN3UD@186.65.115.27:9980")
+                ManagerApp.logger_client.info("Started process for {}".format(self.get_name_surname_from_client(client)))
+                ManagerApp().set_ip_poxy(ManagerApp.get_json_data()["proxy_url"])
+                #ManagerApp().set_ip_poxy("socks5://LCjFKu:kVN3UD@186.65.115.27:9980")
                 driver = ManagerApp().get_driver()
                 Control().add_sessions(client)
                 pid = driver.service.process.pid
@@ -104,12 +104,12 @@ class Control:
                 self.delete_client_from_process_queue_shared(client, process_queue_shared)
                 self.delete_client_from_sessions(client)
                 control_client_activity_process.kill()
-                ManagerApp.logger_client.info(str(client.get(Google_Doc.phone))+": Successfully")
+                ManagerApp.logger_client.info("{}: Successfully".format(client.get(Google_Doc.phone)))
                 sys.exit()
             else:
-                ManagerApp.logger_main.warning("Incorrect client data: " + str(client))
+                ManagerApp.logger_main.warning("Incorrect client data: {}".format(client))
         except Exception as e:
-            ManagerApp.logger_main.error("Unexpected error: "+str(e)+"\nRestart client thread")
+            ManagerApp.logger_main.error("Unexpected error: {}\nRestart client thread".format(e))
             for index, client_process in enumerate(process_queue_shared):
                 if client_process["PHONE"] == client.get(Google_Doc.phone):
                     client_process["ACTIVE"] = 0
@@ -126,7 +126,7 @@ class Control:
                 process_queue_shared.remove(item)
 
     def delete_client_from_sessions(self, client):
-        ManagerApp.logger_main.info("Delete from sessions client: " + str(client))
+        ManagerApp.logger_main.info("Delete from sessions client: {}".format(client))
         fio = str(client.get(Google_Doc.name)) + " " + str(client.get(Google_Doc.surname))
         Data_Base.execute_process("delete from sessions where fio='%s'" % fio)
 
@@ -168,8 +168,8 @@ class Control:
         return Data_Base.execute_process("update settings set monitoring_status=0")
     def control_sessions_queue(self):
         try:
-            ManagerApp.logger_main.info("Running process: "+str(multiprocessing.active_children()))
-            ManagerApp.logger_main.info("Control sessions queue: process_queue_shared="+ str(Control.process_queue_shared))
+            ManagerApp.logger_main.info("Running process: {}".format(multiprocessing.active_children()))
+            ManagerApp.logger_main.info("Control sessions queue: process_queue_shared={}".format(Control.process_queue_shared))
             for client in Control.process_queue_shared:
                 #print("control_sessions: client=", client)
                 if client["ACTIVE"] == 0:
@@ -178,9 +178,9 @@ class Control:
                     for p in multiprocessing.active_children():
                         print(p.name)
                         if p.name.__contains__(Control.thread) and p.name.__contains__(phone):
-                            ManagerApp.logger_main.info("Session_Conctrol: Process " + str(p.name) + " kill")
+                            ManagerApp.logger_main.info("Session_Conctrol: Process {} kill".format(p.name))
                             p.kill()
-                            self.execute_bash_command("kill -9 "+str(client.get("PID")))
+                            self.execute_bash_command("kill -9 {}".format(client.get("PID")))
                             Control.process_queue_shared.remove(client)
             #ManagerApp.logger_main.info("control_sessions: process_queue_shared after="+ str(Control.process_queue_shared))
         except Exception as e:
@@ -205,12 +205,12 @@ class Control:
         ManagerApp.logger_main.info("Start clients threads...")
         for client in client_data_list:
             if self.check_exist_process(client.get(Google_Doc.phone)) == False:
-                name_process = "ClientThread_" + str(client.get(Google_Doc.phone))
-                ManagerApp.logger_main.info("Started process for " + self.get_name_surname_from_client(client))
+                name_process = "ClientThread_{}".format(client.get(Google_Doc.phone))
+                ManagerApp.logger_main.info("Started process for {}".format(self.get_name_surname_from_client(client)))
                 p1 = Process(target=self.get_client_order, name=name_process,
                              args=(client, Control.process_queue_shared))
                 p1.start()
-                ManagerApp.logger_main.info("Start " + name_process)
+                ManagerApp.logger_main.info("Start {}".format(name_process))
             sleep(5)
 
     def add_sessions(self, client):
@@ -252,9 +252,9 @@ class Control:
 
     def get_value_client_from_clients_data(self, column_name, value_for_search):
         client_data = self.get_client_data()
-        ManagerApp.logger_main.info("get_value_client_from_clients_data: client_data="+str(client_data))
+        ManagerApp.logger_main.info("get_value_client_from_clients_data: client_data={}".format(client_data))
         ManagerApp.logger_main.info("Gel value client from clients list: "+"\n"+
-                                            "client_data ="+str(client_data))
+                                            "client_data ={}".format(client_data))
 
         for i in client_data:
             i: dict
@@ -326,19 +326,19 @@ class Control:
 
     def check_valid(self, client):
         if str(client.get(Google_Doc.name)).strip() == "":
-            ManagerApp.logger_main.warning("Invalid value found: " + str(client.get(Google_Doc.name)))
+            ManagerApp.logger_main.warning("Invalid value found: {}".format(client.get(Google_Doc.name)))
             return False
         if str(client.get(Google_Doc.surname)).strip() == "":
-            ManagerApp.logger_main.warning("Invalid value found: " + str(client.get(Google_Doc.surname)))
+            ManagerApp.logger_main.warning("Invalid value found: {}".format(client.get(Google_Doc.surname)))
             return False
         if len(str(client.get(Google_Doc.phone)).strip()) < 5 or str(client.get(Google_Doc.phone)).isdigit() == False:
-            ManagerApp.logger_main.warning("Invalid value found: " + str(client.get(Google_Doc.phone)))
+            ManagerApp.logger_main.warning("Invalid value found: {}".format(client.get(Google_Doc.phone)))
             return False
         if self.check_email(client.get(Google_Doc.email)) == False:
-            ManagerApp.logger_main.warning("Invalid value found: " + str(client.get(Google_Doc.email)))
+            ManagerApp.logger_main.warning("Invalid value found: {}".format(client.get(Google_Doc.email)))
             return False
         if self.check_date_valid(client.get(Google_Doc.birth_date)) == False:
-            ManagerApp.logger_main.warning("Invalid value found: " + str(client.get(Google_Doc.birth_date)))
+            ManagerApp.logger_main.warning("Invalid value found: {}".format(client.get(Google_Doc.birth_date)))
             return False
         date_order = str(client.get(Google_Doc.order_date))
         if date_order.__contains__("-") or date_order.__contains__(","):
@@ -346,13 +346,13 @@ class Control:
                 data_split = date_order.split(",")
                 for i in data_split:
                     if self.check_date_valid(i.strip()) == False:
-                        ManagerApp.logger_main.warning("Invalid value found: " + str(client.get(Google_Doc.order_date)))
+                        ManagerApp.logger_main.warning("Invalid value found: {}".format(client.get(Google_Doc.order_date)))
                         return False
             if date_order.__contains__("-"):
                 data_split = date_order.split("-")
                 for i in data_split:
                     if self.check_date_valid(i.strip()) == False:
-                        ManagerApp.logger_main.warning("Invalid value found: " + str(client.get(Google_Doc.order_date)))
+                        ManagerApp.logger_main.warning("Invalid value found: {}".format(client.get(Google_Doc.order_date)))
                         return False
         return True
 
@@ -375,19 +375,19 @@ class Control:
         driver.execute_script('document.title = "%s"' % name_title)
         driver.execute_script('window.print();')
         document_pdf = os.path.abspath(ManagerApp.get_value_from_config("ORDER_DOCUMENT_PATH")+name_title + ".pdf")
-        ManagerApp.logger_client.info(str(phone)+": document_pdf="+document_pdf)
+        ManagerApp.logger_client.info("{}: document_pdf={}".format(phone,document_pdf))
         for i in range(10):
             if os.path.exists(document_pdf):
-                ManagerApp.logger_client.info("Document pdf created: " + document_pdf)
+                ManagerApp.logger_client.info("Document pdf created: {}".format(document_pdf))
                 break
             else: sleep(2)
         if os.path.exists(document_pdf) == False:
-            ManagerApp.logger_client.info(phone+": Error! Document pdf don't created! " + document_pdf)
+            ManagerApp.logger_client.info("{}: Error! Document pdf don't created! {}".format(phone,document_pdf))
             return None
         return document_pdf
 
     def execute_bash_command(self, command):
-        ManagerApp.logger_main.info("Execute bash-command: "+command)
+        ManagerApp.logger_main.info("Execute bash-command: {}".format(command))
         try:
             process = subprocess.Popen(command.split(), stdout=subprocess.PIPE)
             output, error = process.communicate()
@@ -398,20 +398,20 @@ class Control:
     def check_available_site(self):
         time_seconds_wait = 60
         while True:
-            ManagerApp.logger_main.info("Checking the availability of the site " + Authorization.start_page)
+            ManagerApp.logger_main.info("Checking the availability of the site {}".format(Authorization.start_page))
             try:
                 if str(urllib.request.urlopen(Authorization.start_page).getcode()) == "200":
                     self.enable_monitoring()
                     break
                 else:
-                    ManagerApp.logger_main.warning("Website unavailable! Wait "+str(time_seconds_wait)+" seconds...")
+                    ManagerApp.logger_main.warning("Website unavailable! Wait {} seconds...".format(time_seconds_wait))
                     self.disable_monitoring()
                     self.stop_all_process()
                     sleep(time_seconds_wait)
             except Exception as e:
                 self.stop_all_process()
                 Control.process_queue_shared = multiprocessing.Manager().list()
-                ManagerApp.logger_main.warning("Website "+Authorization.start_page+" unavailable! Wait " + str(time_seconds_wait) + " seconds...")
+                ManagerApp.logger_main.warning("Website {} unavailable! Wait {} seconds...".format(Authorization.start_page,time_seconds_wait))
                 self.disable_monitoring()
                 sleep(time_seconds_wait)
 
