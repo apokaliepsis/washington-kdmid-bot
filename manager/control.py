@@ -419,7 +419,7 @@ class Control:
         with open(document_html, 'wb') as f:
             f.write(source_page.encode('utf-8'))
         document_pdf = os.path.abspath(ManagerApp.get_value_from_config("ORDER_DOCUMENT_PATH") + name_title + ".pdf")
-        self.execute_bash_command("google-chrome --headless --disable-gpu --print-to-pdf={} {}".format(document_pdf, document_html))
+        self.execute_bash_command("google-chrome --headless --no-sandbox --disable-gpu --print-to-pdf={} {}".format(document_pdf, document_html))
         os.remove(document_html)
         ManagerApp.logger_client.info("{}: document_pdf={}".format(phone, document_pdf))
         for i in range(10):
