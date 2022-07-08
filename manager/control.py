@@ -75,6 +75,7 @@ class Control:
                 ManagerApp().set_ip_poxy(ManagerApp.get_json_data()["proxy_url"])
                 # ManagerApp().set_ip_poxy("socks5://LCjFKu:kVN3UD@186.65.115.27:9980")
                 driver = ManagerApp().get_driver()
+                driver.delete_all_cookies()
                 Control().add_sessions(client)
                 pid = driver.service.process.pid
                 print("PID=", pid)
@@ -100,7 +101,8 @@ class Control:
                 Calendar_Page().click_by_print()
                 order_file_path = self.save_pdf_with_headless(client)
                 driver.implicitly_wait(ManagerApp.time_implicit_wait)
-                starter_bot.send_file(order_file_path, "873327794")
+                #starter_bot.send_file(order_file_path, "873327794")
+                starter_bot.send_file(order_file_path, "-1001764220073")
 
                 os.remove(order_file_path)
                 Google_Doc().delete_row_gspread(client.get(Google_Doc.phone))
@@ -196,7 +198,7 @@ class Control:
         except Exception as e:
             ManagerApp.logger_main.warning(str(e))
 
-    def stop_all_process(self):
+    def stop_all_process(self, disable_monitoring):
         ManagerApp.logger_main.info("Stop all clients process...")
         for p in multiprocessing.active_children():
             print(p.name)
@@ -206,7 +208,8 @@ class Control:
         ManagerApp.logger_main.info(
             "Process_queue_shared={}".format(Control.process_queue_shared))
         self.delete_sessions()
-        self.disable_monitoring()
+        if disable_monitoring == True:
+            self.disable_monitoring()
         self.execute_bash_command("pkill -9 -f chromedriver")
         self.execute_bash_command("pkill -9 -f chrome")
         ManagerApp.logger_main.info("All client processes are killed")
@@ -218,8 +221,12 @@ class Control:
 
     def start_clients_threads(self, client_data_list):
         ManagerApp.logger_main.info("Start clients threads...")
+        self.check_memory_ram()
         for client in client_data_list:
-            if self.check_exist_process(client.get(Google_Doc.phone)) == False and int(self.get_status_monitoring()) == 1:
+            if self.check_exist_process(client.get(Google_Doc.phone)) == False\
+                    and int(self.get_status_monitoring()) == 1\
+                    and len(Control.process_queue_shared)<11:
+
                 name_process = "ClientThread_{}".format(client.get(Google_Doc.phone))
                 ManagerApp.logger_main.info("Started process for {}".format(self.get_name_surname_from_client(client)))
                 p1 = Process(target=self.get_client_order, name=name_process,
@@ -455,10 +462,10 @@ class Control:
                 else:
                     ManagerApp.logger_main.warning("Website unavailable! Wait {} seconds...".format(time_seconds_wait))
                     self.disable_monitoring()
-                    self.stop_all_process()
+                    self.stop_all_process(disable_monitoring=True)
                     sleep(time_seconds_wait)
             except Exception as e:
-                self.stop_all_process()
+                self.stop_all_process(disable_monitoring=True)
                 Control.process_queue_shared = multiprocessing.Manager().list()
                 ManagerApp.logger_main.warning(
                     "Website {} unavailable! Wait {} seconds...".format(Authorization.start_page, time_seconds_wait))
@@ -472,3 +479,10 @@ class Control:
         if os.path.exists("temp") == False:
             os.makedirs(os.path.abspath(order))
             os.makedirs(os.path.abspath(captcha))
+
+    def check_memory_ram(self):
+        res = Control().execute_bash_command("grep MemAvailable /proc/meminfo")
+        mem_available = re.findall(r'\d+', str(res))[0]
+        ManagerApp.logger_main.info("Free memory RAM: {}".format(mem_available))
+        if int(mem_available) < 100000:
+            self.stop_all_process(disable_monitoring=False)

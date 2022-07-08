@@ -1,4 +1,6 @@
 import os
+import re
+import sys
 
 import requests
 
@@ -31,10 +33,8 @@ print(c)
 # ManagerApp().set_ip_poxy("socks5://LCjFKu:kVN3UD@186.65.115.27:9980")
 # driver.get("https://whatismyipaddress.com/")
 #starter_bot.send_file("client.log","873327794")
-import os
-import psutil
+res = Control().execute_bash_command("grep MemAvailable /proc/meminfo")
+mem_available = re.findall(r'\d+', str(res))[0]
+print(mem_available)
 
-pid = os.getpid()
-python_process = psutil.Process(pid)
-memoryUse = python_process.memory_info()  # memory use in GB...I think
-print('memory use:', memoryUse)
+
