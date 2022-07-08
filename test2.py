@@ -31,4 +31,10 @@ print(c)
 # ManagerApp().set_ip_poxy("socks5://LCjFKu:kVN3UD@186.65.115.27:9980")
 # driver.get("https://whatismyipaddress.com/")
 #starter_bot.send_file("client.log","873327794")
-Google_Doc().delete_row_from_doc("6633443")
+import os
+import psutil
+
+pid = os.getpid()
+python_process = psutil.Process(pid)
+memoryUse = python_process.memory_info()  # memory use in GB...I think
+print('memory use:', memoryUse)
