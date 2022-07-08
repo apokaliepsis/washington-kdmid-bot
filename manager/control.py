@@ -98,7 +98,7 @@ class Control:
                 Calendar_Page().click_by_make_order()
                 driver.implicitly_wait(600)
                 Calendar_Page().click_by_print()
-                order_file_path = self.save_current_page_as_pdf(client)
+                order_file_path = self.save_pdf_with_headless(client)
                 driver.implicitly_wait(ManagerApp.time_implicit_wait)
                 starter_bot.send_file(order_file_path, "873327794")
 
@@ -402,19 +402,25 @@ class Control:
             ManagerApp.logger_client.info("{}: Error! Document pdf don't created! {}".format(phone, document_pdf))
             return None
         return document_pdf
-    def save_current_page_as_pdf2(self,client):
+    def save_pdf_with_headless(self, client):
         driver = ManagerApp().get_driver()
         phone = str(client.get(Google_Doc.phone))
         ManagerApp.logger_client.info(phone + ": Save current page as pdf")
-        #ManagerApp.logger_client.info(driver.find_element_by_css_selector("#Label_Message").text)
+        ManagerApp.logger_client.info(driver.find_element_by_css_selector("#Label_Message").text)
         name_title = str(client.get(Google_Doc.name)) + "_" + str(client.get(Google_Doc.surname))
 
         document_html = os.path.abspath(ManagerApp.get_value_from_config("ORDER_DOCUMENT_PATH") + name_title + ".html")
-        with open(document_html, 'w') as f:
-            f.write(driver.page_source)
+        # source = (driver.page_source).encode('cp1251')
+        # f = open("index.html", 'wb')
+        # f.write(source)
+        # f.close()
+        source_page = driver.page_source
+        source_page = source_page.replace("Уважаемый", "Уважаемый(-ая)")
+        with open(document_html, 'wb') as f:
+            f.write(source_page.encode('utf-8'))
         document_pdf = os.path.abspath(ManagerApp.get_value_from_config("ORDER_DOCUMENT_PATH") + name_title + ".pdf")
         self.execute_bash_command("google-chrome --headless --disable-gpu --print-to-pdf={} {}".format(document_pdf, document_html))
-        #os.remove(document_html)
+        os.remove(document_html)
         ManagerApp.logger_client.info("{}: document_pdf={}".format(phone, document_pdf))
         for i in range(10):
             if os.path.exists(document_pdf):

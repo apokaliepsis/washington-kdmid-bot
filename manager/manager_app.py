@@ -12,8 +12,8 @@ from fake_useragent import UserAgent
 
 selenium_logger = logging.getLogger('seleniumwire')
 selenium_logger.setLevel(logging.ERROR)
-# easyocr_logger = logging.getLogger('easyocr')
-# easyocr_logger.setLevel(logging.ERROR)
+fake_useragent_logger = logging.getLogger('fake_useragent')
+fake_useragent_logger.setLevel(logging.ERROR)
 
 logger.add("main.log", filter=lambda record: record["extra"].get("name") == "logger_main", format="{time:YYYY-MM-DD HH:mm:ss.SSS} {name} {message}", level="DEBUG", rotation="1 MB")
 logger.add("client.log", filter=lambda record: record["extra"].get("name") == "logger_client", format="{time:YYYY-MM-DD HH:mm:ss.SSS} {name} {message}", level="DEBUG", rotation="1 MB")
@@ -53,7 +53,7 @@ class ManagerApp:
         chrome_options.add_argument("--window-size=1920,1080")
         chrome_options.add_argument(
             f"user-agent={userAgent}")
-        #chrome_options.add_argument("--headless")
+        chrome_options.add_argument("--headless")
         #chrome_options.add_argument("--proxy-server=socks5://4sdBGU:E3F6K7@181.177.86.241:9526")
         # chrome_options.add_argument("--disable-extensions")
         # chrome_options.add_argument("--profile-directory=Default")
@@ -61,7 +61,9 @@ class ManagerApp:
         chrome_options.add_argument("--disable-blink-features=AutomationControlled")
         chrome_options.add_argument("--no-sandbox")
         chrome_options.add_argument("--disable-dev-shm-usage")
-        #chrome_options.add_argument("--disable-gpu")
+        chrome_options.add_argument("--disable-gpu")
+        chrome_options.add_argument("--enable-javascript")
+
         ManagerApp.logger_main.info("Proxy: " + str(self.__options))
         self.__driver = webdriver.Chrome(executable_path=ChromeDriverManager().install(),
                                          chrome_options=chrome_options, seleniumwire_options=self.__options)
