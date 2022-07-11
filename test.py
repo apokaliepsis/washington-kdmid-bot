@@ -15,6 +15,7 @@ from multiprocessing import Process
 from time import sleep
 
 import jaydebeapi
+import requests
 from loguru import logger
 from memory_profiler import profile
 
@@ -111,15 +112,17 @@ if __name__ == '__main__':
     # Control().get_client_order(client, process_queue_shared)
     #date_order = Control().get_value_client_from_clients_data(Google_Doc.order_date, str("544344"))
     #print(date_order)
-    # ManagerApp().set_ip_poxy("socks5://weTPxd:jzzc7M@hub-us-6-1.litport.net:5935")
-    # ManagerApp().set_ip_poxy("socks5://4sdBGU:E3F6K7@181.177.86.241:9526")
+
     # ManagerApp().set_ip_poxy(ManagerApp.get_json_data()["proxy_url"])
-    try:
-        driver = ManagerApp().get_driver()
-        driver.get("http://washington.kdmid.ru/queue/SPQueuePrn.aspx")
-        Control().save_pdf_with_headless(client)
-    except Exception as e:
-        print("Error pdf create: ",e)
+    # driver = ManagerApp().get_driver()
+    # #driver.get("https://2ip.ru")
+    #
+    # for i in range(0,1,30):
+    #     ManagerApp.logger_main.info("Rotate proxy")
+    #     requests.get("https://litport.net/sys/pool-select?key=3fc9349fadb9a2f8018b775b6154be1f&num=%s" % i)
+    #     driver.get("https://2ip.ru")
+    #     sleep(30)
+
 
 
 

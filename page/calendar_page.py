@@ -158,7 +158,7 @@ class Calendar_Page:
                 while len(driver.find_elements_by_xpath(self.table_xpath)) == 0:
                     ManagerApp.logger_client.info(
                         phone + ": No available slots. We wait {} seconds".format(time_refresh_page_wait))
-                    time_wait = random.randint(time_refresh_page_wait - 20, time_refresh_page_wait + 20)
+                    time_wait = random.randint(time_refresh_page_wait - 30, time_refresh_page_wait + 30)
                     sleep(time_wait)
                     ManagerApp.logger_client.info("{}: Restart page".format(phone))
                     driver.execute_script("window.location.reload()")

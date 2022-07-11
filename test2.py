@@ -29,8 +29,7 @@ print(b)
 print(c)
 
 # driver = ManagerApp().get_driver()
-# #ManagerApp().set_ip_poxy("http://weTPxd:jzzc7M@hub-us-6-1.litport.net:1337")
-# ManagerApp().set_ip_poxy("socks5://LCjFKu:kVN3UD@186.65.115.27:9980")
+
 # driver.get("https://whatismyipaddress.com/")
 #starter_bot.send_file("client.log","873327794")
 res = Control().execute_bash_command("grep MemAvailable /proc/meminfo")

@@ -13,6 +13,7 @@ import string
 from time import sleep
 
 import pygsheets
+import requests
 from cffi.backend_ctypes import xrange
 from dateutil.parser import parse
 import urllib.request
@@ -73,7 +74,6 @@ class Control:
                 ManagerApp.logger_client.info(
                     "Started process for {}".format(self.get_name_surname_from_client(client)))
                 ManagerApp().set_ip_poxy(ManagerApp.get_json_data()["proxy_url"])
-                # ManagerApp().set_ip_poxy("socks5://LCjFKu:kVN3UD@186.65.115.27:9980")
                 driver = ManagerApp().get_driver()
                 driver.delete_all_cookies()
                 Control().add_sessions(client)
@@ -87,11 +87,6 @@ class Control:
                                                               client.get(Google_Doc.phone)),
                                                           args=(process_queue_shared, client, driver))
                 control_client_activity_process.start()
-
-                ###ManagerApp().set_ip_poxy("socks5://4sdBGU:E3F6K7@181.177.86.241:9526")
-                ###ManagerApp().set_ip_poxy("socks5://70KAot:7u6J69@hub-us-6-1.litport.net:5337")
-                ###ManagerApp().set_ip_poxy("socks5://LCjFKu:kVN3UD@186.65.115.27:9980")
-                ###ManagerApp().set_ip_poxy("socks5://weTPxd:jzzc7M@hub-us-6-1.litport.net:5512")
 
                 Authorization().authorize(client)
                 Consul_Services().go_to_for_get_passport(client)
@@ -147,6 +142,10 @@ class Control:
 
         bot_process = Process(target=start_bot, name="Bot", args=(Control.process_queue_shared,))
         bot_process.start()
+
+        control_ip_proxy = Process(target=self.rotate_proxy, name="Proxy_Rotate")
+        control_ip_proxy.start()
+
         Control.__client_data_list = Google_Doc().get_google_doc_data()
 
         while True:
@@ -161,6 +160,7 @@ class Control:
                 sleep(10)
 
 
+
             except Exception as e:
                 time_wait = 10
                 ManagerApp.logger_main.error("Network problems. Wait %s seconds" % str(time_wait))
@@ -169,6 +169,12 @@ class Control:
     def get_status_monitoring(self):
         return Data_Base.get_data_by_query("select* from settings")[0].get("MONITORING_STATUS")
 
+    def rotate_proxy(self):
+        while True:
+            for i in [1,2,3,4,6,8,9,10,11,12,13,14,15,16,18,19,20,21,23,24,25,26,27,28,29,30]:
+                ManagerApp.logger_main.info("Rotate proxy")
+                requests.get("https://litport.net/sys/pool-select?key=3fc9349fadb9a2f8018b775b6154be1f&num=%s" % i)
+                sleep(int(ManagerApp.get_value_from_config("TIME_PROXY_ROTATE")))
     def enable_monitoring(self):
         ManagerApp.logger_main.info("Enable monitoring")
         return Data_Base.execute_process("update settings set monitoring_status=1")
@@ -210,8 +216,8 @@ class Control:
         self.delete_sessions()
         if disable_monitoring == True:
             self.disable_monitoring()
-        self.execute_bash_command("pkill -9 -f chromedriver")
-        self.execute_bash_command("pkill -9 -f chrome")
+        self.execute_bash_command("pkill -9 chromedriver")
+        self.execute_bash_command("pkill -9 chrome")
         ManagerApp.logger_main.info("All client processes are killed")
 
     def delete_sessions(self):
@@ -225,7 +231,7 @@ class Control:
         for client in client_data_list:
             if self.check_exist_process(client.get(Google_Doc.phone)) == False\
                     and int(self.get_status_monitoring()) == 1\
-                    and len(Control.process_queue_shared)<11:
+                    and len(Control.process_queue_shared)<int(ManagerApp.get_value_from_config("MAX_COUNT_CLIENT_THREAD")):
 
                 name_process = "ClientThread_{}".format(client.get(Google_Doc.phone))
                 ManagerApp.logger_main.info("Started process for {}".format(self.get_name_surname_from_client(client)))
@@ -484,5 +490,8 @@ class Control:
         res = Control().execute_bash_command("grep MemAvailable /proc/meminfo")
         mem_available = re.findall(r'\d+', str(res))[0]
         ManagerApp.logger_main.info("Free memory RAM: {}".format(mem_available))
-        if int(mem_available) < 100000:
+        if int(mem_available) < 300000:
             self.stop_all_process(disable_monitoring=False)
+
+    def get_user_status_db(self,chatid):
+        return Data_Base.get_data_by_query("select* from configuration where chatid=%s" % chatid)[0].get("IS_ADMIN")
