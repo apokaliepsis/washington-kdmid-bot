@@ -3,6 +3,8 @@ import multiprocessing
 from datetime import datetime
 from time import sleep
 import requests
+
+import main
 import starter_bot
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup, Update, KeyboardButton
 
@@ -13,7 +15,17 @@ import logging
 from aiogram import Bot, Dispatcher, executor, types
 from tg_bot.menu import Menu
 
-BOT_TOKEN = ManagerApp.get_json_data()["bot_token"]
+
+def get_token_bot():
+    if main.IS_TEST == True:
+        return ManagerApp.get_json_data()["bot_token_test"]
+    else:
+        return ManagerApp.get_json_data()["bot_token"]
+
+
+
+
+BOT_TOKEN = get_token_bot()
 admin_chat_id = "873327794"
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -123,17 +135,17 @@ async def stop_process(callback):
                                         text="Остановка процессов...")
         # for index, client_process in enumerate(process_queue_shared):
         #     ManagerApp.logger_main.info("Set ACTIVE=0 for all")
-        #     Data_Base.execute_process("update settings set monitoring_status=0")
-        #     print("BOT: process_queue_shared1=", process_queue_shared)
+        #     Control().disable_monitoring()
         #     client_process["ACTIVE"] = 0
         #     process_queue_shared[index] = client_process
         #     print("BOT: client_process=", client_process)
         #     print("BOT: process_queue_shared2=", process_queue_shared)
-        #     sleep(5)
+        #     sleep(3)
         # for index in range(10):
         #     if len(Data_Base.execute_select_query("select* from sessions")) > 0:
         #         sleep(5)
         # Control().execute_bash_command("pkill -9 -f chromedriver")
+        # Control().execute_bash_command("pkill -9 -f chrome")
         Control().stop_all_process(disable_monitoring=True)
 
         await bot_telegram.send_message(chat_id=callback.message.chat.id,

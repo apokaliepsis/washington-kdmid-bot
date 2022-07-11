@@ -5,6 +5,7 @@ import multiprocessing
 import shutil
 import subprocess
 import sys
+from http.client import RemoteDisconnected
 from multiprocessing import Process
 import os
 import random
@@ -20,6 +21,7 @@ import urllib.request
 
 from loguru import logger
 from memory_profiler import profile
+from urllib3.exceptions import NewConnectionError
 
 import starter_bot
 from starter_bot import start_bot
@@ -47,7 +49,6 @@ class Control:
         ManagerApp.logger_client.info("{}: Start Control_Client_Process: queue={}".format(phone, process_queue_shared))
         try:
             while True:
-                #print("Loop Control_Client_Process")
                 for client_process in process_queue_shared:
                     if str(client_process.get("PHONE")) == phone and client_process.get("ACTIVE") == 0:
                         ManagerApp.logger_client.info("Close process for {}".format(phone))
@@ -109,6 +110,7 @@ class Control:
                 sys.exit()
             else:
                 ManagerApp.logger_main.warning("Incorrect client data: {}".format(client))
+
         except Exception as e:
             ManagerApp.logger_main.error("Unexpected error: {}\nRestart client thread".format(e))
             for index, client_process in enumerate(process_queue_shared):
@@ -206,19 +208,31 @@ class Control:
 
     def stop_all_process(self, disable_monitoring):
         ManagerApp.logger_main.info("Stop all clients process...")
+        if disable_monitoring == True:
+            self.disable_monitoring()
+        self.delete_sessions()
+
         for p in multiprocessing.active_children():
             print(p.name)
             if p.name.__contains__(Control.thread):
                 p.kill()
+                ManagerApp.logger_main.info("Kill process {}".format(p.name))
+                sleep(0.2)
         Control.process_queue_shared = multiprocessing.Manager().list()
+        self.execute_bash_command("pkill -9 chrome")
+        self.execute_bash_command("pkill -9 chromedriver")
         ManagerApp.logger_main.info(
             "Process_queue_shared={}".format(Control.process_queue_shared))
+
+        ManagerApp.logger_main.info("All client processes are killed")
+
+    def stop_all_from_children_process(self):
         self.delete_sessions()
-        if disable_monitoring == True:
-            self.disable_monitoring()
+        Control.process_queue_shared = multiprocessing.Manager().list()
         self.execute_bash_command("pkill -9 chromedriver")
         self.execute_bash_command("pkill -9 chrome")
-        ManagerApp.logger_main.info("All client processes are killed")
+        ManagerApp.logger_main.info(
+            "Process_queue_shared={}".format(Control.process_queue_shared))
 
     def delete_sessions(self):
         ManagerApp.logger_main.info("Delete sessions")

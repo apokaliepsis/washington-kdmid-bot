@@ -5,6 +5,8 @@ import pygsheets
 import gspread
 
 from oauth2client.service_account import ServiceAccountCredentials
+
+import main
 from manager.manager_app import ManagerApp
 
 
@@ -50,7 +52,10 @@ class Google_Doc:
                  'https://www.googleapis.com/auth/spreadsheets']
         credentials = ServiceAccountCredentials.from_json_keyfile_name(Google_Doc.auth_file, scope)
         gc = gspread.authorize(credentials)
-        worksheet = gc.open_by_url(ManagerApp.get_json_data()["document_url"]).sheet1
+        if main.IS_TEST == True:
+            worksheet = gc.open_by_url(ManagerApp.get_json_data()["document_url_test"]).sheet1
+        else:
+            worksheet = gc.open_by_url(ManagerApp.get_json_data()["document_url"]).sheet1
         return worksheet
 
     def delete_row_gspread(self, value):
