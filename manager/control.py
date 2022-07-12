@@ -23,6 +23,7 @@ from loguru import logger
 from memory_profiler import profile
 from urllib3.exceptions import NewConnectionError
 
+import main
 import starter_bot
 from starter_bot import start_bot
 from data_base import Data_Base
@@ -57,10 +58,10 @@ class Control:
                         Data_Base.execute_process("delete from sessions where phone='%s'" % phone)
                         driver.quit()
                         ManagerApp.logger_client.info("Quit driver for {}".format(phone))
-                        # process_queue.remove(client_process)
+                        process_queue_shared.remove(client_process)
                         # Control.execute_bash_command()
                         _thread.interrupt_main()
-                sleep(5)
+                sleep(2)
         except Exception as e:
             ManagerApp.logger_client.warning("{}: Error control_client_process!".format(phone))
             ManagerApp.logger_client.warning("{}: {}".format(phone, e))
@@ -97,8 +98,10 @@ class Control:
                 Calendar_Page().click_by_print()
                 order_file_path = self.save_pdf_with_headless(client)
                 driver.implicitly_wait(ManagerApp.time_implicit_wait)
-                #starter_bot.send_file(order_file_path, "873327794")
-                starter_bot.send_file(order_file_path, "-1001764220073")
+                if main.IS_TEST == True:
+                    starter_bot.send_file(order_file_path, "873327794")
+                else:
+                    starter_bot.send_file(order_file_path, "-1001764220073")
 
                 os.remove(order_file_path)
                 Google_Doc().delete_row_gspread(client.get(Google_Doc.phone))
@@ -112,15 +115,22 @@ class Control:
                 ManagerApp.logger_main.warning("Incorrect client data: {}".format(client))
 
         except Exception as e:
-            ManagerApp.logger_main.error("Unexpected error: {}\nRestart client thread".format(e))
-            for index, client_process in enumerate(process_queue_shared):
-                if client_process["PHONE"] == client.get(Google_Doc.phone):
-                    client_process["ACTIVE"] = 0
-                    process_queue_shared[index] = client_process
-            ManagerApp().quit_driver()
-            sleep(5)
-            client = self.get_client_from_clients_data(client.get(Google_Doc.phone))
-            self.get_client_order(client, process_queue_shared)
+            if self.get_status_monitoring() == 1 and\
+                    int(self.get_status_from_process_queue_shared(process_queue_shared, client.get(Google_Doc.phone))) == 1:
+                ManagerApp.logger_main.error("Unexpected error: {}\nRestart client thread".format(e))
+                for index, client_process in enumerate(process_queue_shared):
+                    if client_process["PHONE"] == client.get(Google_Doc.phone):
+                        client_process["ACTIVE"] = 0
+                        process_queue_shared[index] = client_process
+                ManagerApp().quit_driver()
+                sleep(5)
+                client = self.get_client_from_clients_data(client.get(Google_Doc.phone))
+                self.get_client_order(client, process_queue_shared)
+
+    def get_status_from_process_queue_shared(self, process_queue_shared, phone):
+        for client_process in process_queue_shared:
+            if str(client_process.get("PHONE")) == str(phone):
+                return client_process["ACTIVE"]
 
     def delete_client_from_process_queue_shared(self, client, process_queue_shared):
         for item in process_queue_shared:
@@ -149,27 +159,32 @@ class Control:
         control_ip_proxy.start()
 
         Control.__client_data_list = Google_Doc().get_google_doc_data()
-
         while True:
+            ManagerApp.logger_main.info("Clients process: {}".format(self.get_clients_threads()))
+            ManagerApp.logger_main.info("Clients queue: {}".format(Control.process_queue_shared))
             try:
-                if int(self.get_status_monitoring()) == 1:
+                if self.get_status_monitoring() == 1:
                     # self.check_available_site()
-                    if int(self.get_status_monitoring()) == 1 and Control.__client_data_list is not None and len(
+                    if self.get_status_monitoring() == 1 and Control.__client_data_list is not None and len(
                             Control.__client_data_list) > 0:
                         self.start_clients_threads(self.get_client_data())
                     Control.__client_data_list = Google_Doc().get_google_doc_data()
-                    self.control_sessions_queue()
+                    #self.control_sessions_queue()
                 sleep(10)
-
-
 
             except Exception as e:
                 time_wait = 10
                 ManagerApp.logger_main.error("Network problems. Wait %s seconds" % str(time_wait))
                 ManagerApp.logger_main.error(e)
                 sleep(time_wait)
+
     def get_status_monitoring(self):
-        return Data_Base.get_data_by_query("select* from settings")[0].get("MONITORING_STATUS")
+        status = int(Data_Base.get_data_by_query("select* from settings")[0].get("MONITORING_STATUS"))
+        if status == 1:
+            ManagerApp.logger_main.info("Monitoring enabled")
+        else:
+            ManagerApp.logger_main.info("Monitoring disabled")
+        return status
 
     def rotate_proxy(self):
         while True:
@@ -188,21 +203,25 @@ class Control:
     def control_sessions_queue(self):
         try:
             ManagerApp.logger_main.info("Running process: {}".format(multiprocessing.active_children()))
-            ManagerApp.logger_main.info(
-                "Control sessions queue: process_queue_shared={}".format(Control.process_queue_shared))
-            for client in Control.process_queue_shared:
-                # print("control_sessions: client=", client)
-                if client["ACTIVE"] == 0:
-                    phone = str(client.get("PHONE"))
-                    # print("control_sessions_db: ", phone)
-                    for p in multiprocessing.active_children():
-                        print(p.name)
-                        if p.name.__contains__(Control.thread) and p.name.__contains__(phone):
-                            ManagerApp.logger_main.info("Session_Conctrol: Process {} kill".format(p.name))
-                            p.kill()
-                            self.execute_bash_command("kill -9 {}".format(client.get("PID")))
-                            Control.process_queue_shared.remove(client)
-            # ManagerApp.logger_main.info("control_sessions: process_queue_shared after="+ str(Control.process_queue_shared))
+            # ManagerApp.logger_main.info(
+            #     "Control sessions queue: process_queue_shared={}".format(Control.process_queue_shared))
+            # for client in Control.process_queue_shared:
+            #     # print("control_sessions: client=", client)
+            #     if client["ACTIVE"] == 0:
+            #         phone = str(client.get("PHONE"))
+            #         # print("control_sessions_db: ", phone)
+            #         for p in multiprocessing.active_children():
+            #             print(p.name)
+            #             if p.name.__contains__(Control.thread) and p.name.__contains__(phone):
+            #                 ManagerApp.logger_main.info("Session_Conctrol: Process {} kill".format(p.name))
+            #                 p.kill()
+            #                 #self.execute_bash_command("kill -9 {}".format(client.get("PID")))
+            #                 Control.process_queue_shared.remove(client)
+            #                 Data_Base.execute_process("delete from sessions where phone='%s'" % phone)
+            for p in multiprocessing.active_children():
+                if p.name.__contains__(Control.thread):
+                    phone = p.name.replace(Control.thread,"")
+
         except Exception as e:
             ManagerApp.logger_main.warning(str(e))
 
@@ -219,7 +238,7 @@ class Control:
                 ManagerApp.logger_main.info("Kill process {}".format(p.name))
                 sleep(0.2)
         Control.process_queue_shared = multiprocessing.Manager().list()
-        self.execute_bash_command("pkill -9 chrome")
+        #self.execute_bash_command("pkill -9 chrome")
         self.execute_bash_command("pkill -9 chromedriver")
         ManagerApp.logger_main.info(
             "Process_queue_shared={}".format(Control.process_queue_shared))
@@ -244,7 +263,7 @@ class Control:
         self.check_memory_ram()
         for client in client_data_list:
             if self.check_exist_process(client.get(Google_Doc.phone)) == False\
-                    and int(self.get_status_monitoring()) == 1\
+                    and self.get_status_monitoring() == 1\
                     and len(Control.process_queue_shared)<int(ManagerApp.get_value_from_config("MAX_COUNT_CLIENT_THREAD")):
 
                 name_process = "ClientThread_{}".format(client.get(Google_Doc.phone))

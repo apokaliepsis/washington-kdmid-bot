@@ -116,9 +116,6 @@ async def callback_handler(callback: types.CallbackQuery):
                         client_process["ACTIVE"] = 0
                         process_queue_shared[index] = client_process
                         Google_Doc().delete_row_gspread(phone_client)
-                        print("BOT: client_process=", client_process)
-                        # process_queue_shared.append({'PHONE': 77777777, 'ACTIVE': 1})
-                        print("BOT: process_queue_shared2=", process_queue_shared)
                 await bot_telegram.send_message(chat_id=chat_id, text="Процесс остановлен")
             except Exception as e:
                 print(e)
@@ -133,20 +130,18 @@ async def stop_process(callback):
     try:
         await bot_telegram.send_message(chat_id=callback.message.chat.id,
                                         text="Остановка процессов...")
-        # for index, client_process in enumerate(process_queue_shared):
-        #     ManagerApp.logger_main.info("Set ACTIVE=0 for all")
-        #     Control().disable_monitoring()
-        #     client_process["ACTIVE"] = 0
-        #     process_queue_shared[index] = client_process
-        #     print("BOT: client_process=", client_process)
-        #     print("BOT: process_queue_shared2=", process_queue_shared)
-        #     sleep(3)
-        # for index in range(10):
-        #     if len(Data_Base.execute_select_query("select* from sessions")) > 0:
-        #         sleep(5)
+        for index, client_process in enumerate(process_queue_shared):
+            ManagerApp.logger_main.info("Set ACTIVE=0 for all")
+            Control().disable_monitoring()
+            client_process["ACTIVE"] = 0
+            process_queue_shared[index] = client_process
+            sleep(0.1)
+        for index in range(10):
+            if len(Data_Base.execute_select_query("select* from sessions")) > 0:
+                sleep(3)
         # Control().execute_bash_command("pkill -9 -f chromedriver")
         # Control().execute_bash_command("pkill -9 -f chrome")
-        Control().stop_all_process(disable_monitoring=True)
+        #Control().stop_all_process(disable_monitoring=True)
 
         await bot_telegram.send_message(chat_id=callback.message.chat.id,
                                         text="Процессы мониторинга остановлены")
