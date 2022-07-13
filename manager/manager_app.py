@@ -53,7 +53,7 @@ class ManagerApp:
         chrome_options.add_argument("--window-size=1920,1080")
         chrome_options.add_argument(
             f"user-agent={userAgent}")
-        chrome_options.add_argument("--headless")
+        #chrome_options.add_argument("--headless")
         #chrome_options.add_argument("--proxy-server=socks5://4sdBGU:E3F6K7@181.177.86.241:9526")
         # chrome_options.add_argument("--disable-extensions")
         # chrome_options.add_argument("--profile-directory=Default")

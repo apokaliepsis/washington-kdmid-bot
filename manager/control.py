@@ -164,7 +164,7 @@ class Control:
             ManagerApp.logger_main.info("Clients queue: {}".format(Control.process_queue_shared))
             try:
                 if self.get_status_monitoring() == 1:
-                    # self.check_available_site()
+                    self.check_available_site()
                     if self.get_status_monitoring() == 1 and Control.__client_data_list is not None and len(
                             Control.__client_data_list) > 0:
                         self.start_clients_threads(self.get_client_data())
