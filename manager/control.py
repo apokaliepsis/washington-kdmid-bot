@@ -491,7 +491,7 @@ class Control:
             ManagerApp.logger_main.error(e)
 
     def check_available_site(self):
-        time_seconds_wait = 60
+        time_seconds_wait = random.randint(65, 245)
         while True:
             ManagerApp.logger_main.info("Checking the availability of the site {}".format(Authorization.start_page))
             try:
