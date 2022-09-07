@@ -1,5 +1,5 @@
 
-IS_TEST = False
+IS_TEST = True
 
 if __name__ == '__main__':
     from manager.control import Control

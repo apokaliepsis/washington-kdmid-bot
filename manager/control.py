@@ -76,6 +76,7 @@ class Control:
                 ManagerApp.logger_client.info(
                     "Started process for {}".format(self.get_name_surname_from_client(client)))
                 ManagerApp().set_ip_poxy(ManagerApp.get_json_data()["proxy_url"])
+                #ManagerApp().set_ip_poxy("socks5://LCjFKu:kVN3UD@186.65.115.27:9980")
                 driver = ManagerApp().get_driver()
                 driver.delete_all_cookies()
                 Control().add_sessions(client)
@@ -164,7 +165,7 @@ class Control:
             ManagerApp.logger_main.info("Clients queue: {}".format(Control.process_queue_shared))
             try:
                 if self.get_status_monitoring() == 1:
-                    self.check_available_site()
+                    #self.check_available_site()
                     if self.get_status_monitoring() == 1 and Control.__client_data_list is not None and len(
                             Control.__client_data_list) > 0:
                         self.start_clients_threads(self.get_client_data())

@@ -25,6 +25,7 @@ from manager.control import Control
 from manager.errors import Errors
 from manager.manager_app import ManagerApp
 from network_file.google_doc import Google_Doc
+from page.authorization import Authorization
 
 
 def method_sdf2(data,driver):
@@ -113,16 +114,11 @@ if __name__ == '__main__':
     #date_order = Control().get_value_client_from_clients_data(Google_Doc.order_date, str("544344"))
     #print(date_order)
 
-    # ManagerApp().set_ip_poxy(ManagerApp.get_json_data()["proxy_url"])
-    # driver = ManagerApp().get_driver()
-    # #driver.get("https://2ip.ru")
-    #
-    # for i in range(0,1,30):
-    #     ManagerApp.logger_main.info("Rotate proxy")
-    #     requests.get("https://litport.net/sys/pool-select?key=3fc9349fadb9a2f8018b775b6154be1f&num=%s" % i)
-    #     driver.get("https://2ip.ru")
-    #     sleep(30)
-
+    ManagerApp().set_ip_poxy(ManagerApp.get_json_data()["proxy_url"])
+    #ManagerApp().set_ip_poxy("socks5://LCjFKu:kVN3UD@186.65.115.27:9980")
+    driver = ManagerApp().get_driver()
+    #driver.get("https://intoli.com/blog/not-possible-to-block-chrome-headless/chrome-headless-test.html")
+    driver.get("https://2ip.ru")
 
 
 
